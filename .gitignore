@@ -1,0 +1,26 @@
+# --- Unity ---
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+
+# IDE
+.vs/
+.idea/
+*.suo
+*.user
+*.userprefs
+*.csproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Plastic/UVC
+.plastic/
+ignore.conf
