@@ -13,7 +13,7 @@ public class PlayerInteractUI : MonoBehaviour
         if (i != null)
         {
             container.SetActive(true);
-            label.text = $"E  {i.GetInteractText()}";
+            label.text = i.GetInteractText();
         }
         else
         {

@@ -24,6 +24,11 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        HandleMovement();
+    }
+
+    private void HandleMovement()
+    {
         // Get input
         Vector2 inputVector = input.ReadMove();
         
