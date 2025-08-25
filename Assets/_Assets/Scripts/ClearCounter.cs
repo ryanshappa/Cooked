@@ -1,16 +1,15 @@
 using UnityEngine;
 
-public class ClearCounter : MonoBehaviour, IInteractable
+public class ClearCounter : MonoBehaviour, IKitchenObjectParent
 {
-    [SerializeField] private string prompt = "Use Counter";
+    [SerializeField] private Transform counterTopPoint;
 
-    public void Interact(Transform interactorTransform)
-    {
-        Debug.Log($"INTERACT! {name} used by {interactorTransform.name}");
-        // TODO: later — place/pick up logic here
-    }
+    private KitchenObject kitchenObject;
 
-    public string GetInteractText() => prompt;
-
-    public Transform GetTransform() => transform;
+    // IKitchenObjectParent
+    public Transform GetKitchenObjectFollowTransform() => counterTopPoint;
+    public void SetKitchenObject(KitchenObject obj) => kitchenObject = obj;
+    public KitchenObject GetKitchenObject() => kitchenObject;
+    public void ClearKitchenObject() => kitchenObject = null;
+    public bool HasKitchenObject() => kitchenObject != null;
 }
