@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5d931403afcf0ff4a95bd2fc6fcbec61
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290509
+  packageName: 3D Pizza house
+  packageVersion: 1.0
+  assetPath: Assets/PizzA/Prefab/building/Base_floor_tile.prefab
+  uploadId: 678150

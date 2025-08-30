@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b8bed156e0183944d845b22889afdd45
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290509
+  packageName: 3D Pizza house
+  packageVersion: 1.0
+  assetPath: Assets/PizzA/Material/brick.mat
+  uploadId: 678150

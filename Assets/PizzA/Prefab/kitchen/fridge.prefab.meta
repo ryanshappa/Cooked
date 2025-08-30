@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ab908d28d97ea45439ca57adcea578d8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290509
+  packageName: 3D Pizza house
+  packageVersion: 1.0
+  assetPath: Assets/PizzA/Prefab/kitchen/fridge.prefab
+  uploadId: 678150

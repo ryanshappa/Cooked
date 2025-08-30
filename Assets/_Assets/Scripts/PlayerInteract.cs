@@ -36,6 +36,9 @@ public class PlayerInteract : MonoBehaviour
 
         if (current != null && input.Interact != null && input.Interact.WasPressedThisFrame())
         {
+            // Don't interact with KitchenObjects - let PlayerPickupDrop handle those
+            if (current is KitchenObject) return;
+            
             Debug.Log($"Interact pressed on: {current.GetTransform().name}");
             current.Interact(transform);
         }

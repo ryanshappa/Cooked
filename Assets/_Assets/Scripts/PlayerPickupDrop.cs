@@ -4,12 +4,12 @@ using UnityEngine.InputSystem;
 public class PlayerPickupDrop : MonoBehaviour
 {
     [Header("Refs")]
-    [SerializeField] private Transform playerCameraTransform;
-    [SerializeField] private LayerMask interactMask;        // Interactable layer (objects + counters)
-    [SerializeField] private float maxDistance = 2.2f;
+    [SerializeField] private Transform  playerCameraTransform;
+    [SerializeField] private LayerMask  interactMask;
+    [SerializeField] private float      maxDistance = 2.2f;
 
     [Header("Input")]
-    [SerializeField] private InputActionAsset inputActions; // your InputSystem_Actions
+    [SerializeField] private InputActionAsset inputActions;
     private InputAction interactAction;
 
     private PlayerCarry carry;
@@ -17,7 +17,6 @@ public class PlayerPickupDrop : MonoBehaviour
     void Awake()
     {
         carry = GetComponent<PlayerCarry>();
-
         var map = inputActions.FindActionMap("Player", true);
         interactAction = map.FindAction("Interact", true);
     }
@@ -31,20 +30,19 @@ public class PlayerPickupDrop : MonoBehaviour
 
         if (!carry.HasKitchenObject())
         {
-            // Try pick up a KitchenObject
+            // pick up
             if (Physics.Raycast(playerCameraTransform.position, playerCameraTransform.forward,
                                 out RaycastHit hit, maxDistance, interactMask))
             {
-                if (hit.collider && hit.collider.TryGetComponent(out KitchenObject ko))
-                {
-                    // Optional: only if it's not already parented somewhere
-                    if (ko.GetParent() == null) ko.SetParent(carry);
-                }
+                // robust: grab component from parent in case you hit a child collider
+                var ko = hit.collider ? hit.collider.GetComponentInParent<KitchenObject>() : null;
+                if (ko != null && (ko.GetParent() == null || ko.GetParent() is not PlayerCarry))
+                    ko.SetParent(carry);
             }
         }
         else
         {
-            // Try place on a holder surface
+            // place onto a holder if looking at one
             var held = carry.GetKitchenObject();
 
             if (Physics.Raycast(playerCameraTransform.position, playerCameraTransform.forward,
@@ -58,9 +56,8 @@ public class PlayerPickupDrop : MonoBehaviour
                 }
             }
 
-            // Otherwise drop with a little forward toss
+            // else drop with a nudge
             held.DropWithPhysics(playerCameraTransform.forward * 1.5f, Vector3.zero);
-            carry.ClearKitchenObject();
         }
     }
 }

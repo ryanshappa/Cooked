@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 48373e1ab1891ea41ac887f011b1c543
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290509
+  packageName: 3D Pizza house
+  packageVersion: 1.0
+  assetPath: Assets/PizzA/Material/tile_floor.mat
+  uploadId: 678150

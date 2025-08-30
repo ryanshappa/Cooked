@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 083adb52a7375d747a4c18887e5c472b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290509
+  packageName: 3D Pizza house
+  packageVersion: 1.0
+  assetPath: Assets/PizzA/Material/Glass.mat
+  uploadId: 678150

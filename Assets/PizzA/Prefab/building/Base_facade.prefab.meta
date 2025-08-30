@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0ddcb0824de653640915b063e450681f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290509
+  packageName: 3D Pizza house
+  packageVersion: 1.0
+  assetPath: Assets/PizzA/Prefab/building/Base_facade.prefab
+  uploadId: 678150
