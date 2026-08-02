@@ -13,7 +13,7 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `Directional Light`, `Global Volume` (URP post), `Floor` (mesh + MeshCollider)
 - `Player` — `Player`, `PlayerInteract`, `PlayerCarry`; children: head anchor/visual rig (Animator for `PlayerAnimator`)
 - `GameInput` — `GameInput` component with `InputSystem_Actions` assigned
-- `HUD` — Canvas + `PlayerInteractUI` (interact prompt container + TMP label)
+- `HUD` — Canvas with `Crosshair` only (text prompts removed by design; `PlayerInteractUI.cs` kept on disk for break-room tutorial use)
 
 **Gameplay test objects (layer 6 = interactable):**
 - `ClearCounter`, `ClearCounter (1)` — BoxCollider + `ClearCounter`, child `counterTopPoint`

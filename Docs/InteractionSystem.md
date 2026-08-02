@@ -20,17 +20,17 @@ Each frame `PlayerInteract.ResolveTarget()`:
    - **Empty-handed** → hit a `KitchenObject` not held by a player: **Pickup**. Else hit an `IInteractable`: **Use**.
 4. On `GameInput.IsInteractPressed()` the action executes (`SetParent(carry)` / `SetParent(surface)` / `Interact()` / `DropWithPhysics`).
 
-`HasPrompt(out text)` exposes the contextual prompt: "Pick up Tomato", "Place Cheese" (names from `KitchenObjectSO.objectName`), the interactable's own text for Use, "Drop". `PlayerInteractUI` polls it.
+`HasPrompt(out text)` exposes a contextual prompt string ("Pick up Tomato", "Place Cheese", …). **The HUD no longer renders it** — text prompts were removed by design (Aug 2026): the plain crosshair is the only aim feedback; physical affordances carry the meaning. The API and `PlayerInteractUI.cs` are kept for the break-room practice stations (Phase 7), where wordy tutorial prompts are welcome.
 
 `PlayerCarry`: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset` — set to **(0, 0, 0.6)**, i.e. dead-center on the reticle. Held objects are *physically steered* to it (velocity-based follow, colliders on, layer `Held` — see KitchenObjectSystem.md), so what you carry sits on the cursor and collides with the world.
 
 ## Scene/Inspector wiring
 - `Player` GameObject: `Player`, `PlayerInteract`, `PlayerCarry` (PlayerPickupDrop removed). `PlayerInteract` needs `interactMask` (layer 6), `input` (GameInput), and optionally `cameraTransform` (falls back to `Camera.main`). `PlayerCarry` needs the FP camera transform.
-- `HUD` canvas: `PlayerInteractUI` with refs to `PlayerInteract`, prompt container, TMP label.
+- `HUD` canvas: just the `Crosshair` (prompt UI removed from the scene).
 - Interactables live on **layer 6**; components on the root, colliders anywhere below.
 
 ## Known issues / TODO
 - Feel tuning pending player testing: `assistRadius`, `maxDistance`, `dropTossSpeed`, hold offset smoothing.
-- Prompt for an occupied counter is currently nothing — consider a greyed "Full" hint.
+- The Main Camera's culling mask is hand-picked (excludes `PlayerBody`); **any new layer that must render has to be added to it explicitly** — the `Held` layer was invisible until added (mask 119 → 375).
 - Highlight/outline on the targeted object: Phase 1.
 - Phase 2 will extend the action set for held tools (knife/ladle) — the enum + resolve structure is designed to grow.

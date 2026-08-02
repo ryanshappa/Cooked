@@ -138,6 +138,7 @@ Follow the Kitchen Chaos multiplayer course structure, adapted to first-person.
 - [ ] Audit Pandazole + PizzA packs: which stations/ingredients are covered, gap list for custom assets → `Docs/ArtDirection.md`.
 - [ ] Lock a look (low-poly stylized matches the packs): palette + one URP post volume profile.
 - [ ] Chef character: simple rigged low-poly chef (pack or Blender via MCP); needs head-look + carry + minigame gesture animations. Decide full-body-with-camera-clipping vs separate FP arms, and doc it.
+- [ ] **FP carry hands (Peak-style)**: visible first-person hands holding carried items out front with both hands while moving (two-hand grip pose + subtle sway); IK the hands onto the physics-driven held item so they track its wobble.
 - [ ] Ingredient state variants (whole/sliced/cooked/burned) for every recipe ingredient — Blender MCP where packs fall short.
 - [ ] VFX: smoke, steam, sauce splat, order-complete confetti (cheap particle systems).
 - [ ] Full recipe content pass: pizza, burger, salad + 2–3 more dishes with all SOs, prefabs, minigame tuning.
