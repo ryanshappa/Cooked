@@ -2407,7 +2407,7 @@ MonoBehaviour:
   playerHeight: 2
   collisionLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294967039
   cameraHolder: {fileID: 1079885794}
   input: {fileID: 1039790102}
 --- !u!114 &2086255286
@@ -2443,7 +2443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTransform: {fileID: 1079885794}
-  holdOffset: {x: 0, y: -0.25, z: 1}
+  holdOffset: {x: 0, y: 0, z: 0.6}
 --- !u!1001 &2101297816
 PrefabInstance:
   m_ObjectHideFlags: 0

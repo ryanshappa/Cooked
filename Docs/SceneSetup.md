@@ -26,7 +26,9 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`
 
 ## Layers
-- **6** — interactables/kitchen objects (counters, Tomato, Cheese). Not yet formally named/documented in project settings; Phase 0 formalizes the layer scheme + collision matrix.
+- **3 `PlayerBody`** — (pre-existing, currently unused by scripts)
+- **6 `Interactable`** — counters + kitchen objects; `PlayerInteract.interactMask` targets exactly this
+- **8 `Held`** — assigned at runtime to whatever the player is carrying; excluded from `Player.collisionLayers` and from the interact mask so carried items never block movement or the reticle
 
 ## Notes
 - `Assets/Screenshots/` receives MCP screenshot output — gitignore it.

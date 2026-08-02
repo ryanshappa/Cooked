@@ -22,7 +22,7 @@ Each frame `PlayerInteract.ResolveTarget()`:
 
 `HasPrompt(out text)` exposes the contextual prompt: "Pick up Tomato", "Place Cheese" (names from `KitchenObjectSO.objectName`), the interactable's own text for Use, "Drop". `PlayerInteractUI` polls it.
 
-`PlayerCarry` is unchanged: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset`; held objects follow it (physics states in KitchenObjectSystem.md).
+`PlayerCarry`: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset` — set to **(0, 0, 0.6)**, i.e. dead-center on the reticle. Held objects are *physically steered* to it (velocity-based follow, colliders on, layer `Held` — see KitchenObjectSystem.md), so what you carry sits on the cursor and collides with the world.
 
 ## Scene/Inspector wiring
 - `Player` GameObject: `Player`, `PlayerInteract`, `PlayerCarry` (PlayerPickupDrop removed). `PlayerInteract` needs `interactMask` (layer 6), `input` (GameInput), and optionally `cameraTransform` (falls back to `Camera.main`). `PlayerCarry` needs the FP camera transform.

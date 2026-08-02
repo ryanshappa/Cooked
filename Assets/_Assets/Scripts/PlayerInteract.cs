@@ -42,7 +42,10 @@ public class PlayerInteract : MonoBehaviour
         ResolveTarget();
 
         if (input.IsInteractPressed())
+        {
             PerformAction();
+            ResolveTarget(); // action changed world state; re-resolve so nothing reads a stale target this frame
+        }
     }
 
     void ResolveTarget()
@@ -124,10 +127,10 @@ public class PlayerInteract : MonoBehaviour
         switch (action)
         {
             case InteractAction.Pickup:
-                text = $"Pick up {targetKitchenObject.GetKitchenObjectSO().objectName}";
+                text = $"Pick up {GetDisplayName(targetKitchenObject)}";
                 return true;
             case InteractAction.Place:
-                text = $"Place {carry.GetKitchenObject().GetKitchenObjectSO().objectName}";
+                text = $"Place {GetDisplayName(carry.GetKitchenObject())}";
                 return true;
             case InteractAction.Use:
                 text = targetInteractable.GetInteractText();
@@ -139,5 +142,12 @@ public class PlayerInteract : MonoBehaviour
                 text = null;
                 return false;
         }
+    }
+
+    private static string GetDisplayName(KitchenObject ko)
+    {
+        if (ko == null) return "item";
+        var so = ko.GetKitchenObjectSO();
+        return so != null && !string.IsNullOrEmpty(so.objectName) ? so.objectName : ko.name;
     }
 }

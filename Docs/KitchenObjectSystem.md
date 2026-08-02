@@ -13,15 +13,16 @@ Kitchen objects (ingredients, later plates/tools) are physical items that can ex
 ## How it works
 `KitchenObject` caches its `Rigidbody` and all child colliders in `Awake`. State transitions happen in `SetParent(IKitchenObjectParent)`:
 
-| State | Physics | Transform |
+| State | Physics | Transform / layer |
 |---|---|---|
-| Held by `PlayerCarry` | colliders **off**, rb kinematic (velocities zeroed first) | unparented; `Update()` copies the hold-point position/rotation each frame for zero-lag follow |
-| On a counter/surface | colliders **on** (needed so you can target it), rb dynamic but `useGravity=false` | parented to the surface's follow transform, local pos/rot zeroed |
-| Loose (dropped) | colliders on, rb dynamic + gravity | unparented |
+| Held by `PlayerCarry` | colliders **on**, rb dynamic (no gravity, ContinuousDynamic) — **velocity-steered to the hold point** in `FixedUpdate`, so a held item is fully physical and can never phase through counters/walls | unparented, moved to layer **Held** (8) so the player's movement capsule-casts and the interaction ray ignore it |
+| On a counter/surface | colliders **on** (needed so you can target it), rb dynamic but `useGravity=false` | parented to the surface's follow transform, local pos/rot zeroed; back on its original layer |
+| Loose (dropped) | colliders on, rb dynamic + gravity | unparented, original layer |
 
+- **Held follow**: pulls the item's *collider-bounds center* (cached `localCenter` in `Awake`) onto the hold point — not the pivot, because these models' pivots are offset — via `linearVelocity = clamp((target − pos) × followStrength)` and matching `angularVelocity`. Tunables on the component: `followStrength` (20), `maxFollowSpeed` (15), `rotateStrength` (15). Colliding with geometry pushes the item aside; it springs back — that's the intended physical feel.
 - `SetParent` also unlinks the previous parent (`ClearKitchenObject`) and links the new one (`SetKitchenObject`), keeping the parent's single slot consistent.
-- `DropWithPhysics(linearVel, angularVel)` — used by the drop action: clears the parent, re-enables physics, applies a throw velocity.
-- Ordering matters and was bug-prone: velocities must be zeroed *before* setting `isKinematic=true`, and `isKinematic=false` must be set *before* assigning velocities. Don't "simplify" this.
+- `DropWithPhysics(linearVel, angularVel)` — used by the drop action: clears the parent, restores layer/gravity, applies a throw velocity.
+- Ordering matters and was bug-prone: `isKinematic=false` must be set *before* assigning velocities. Don't "simplify" this.
 - Pickup/place goes through the unified `PlayerInteract` (see InteractionSystem.md); `KitchenObject` no longer implements `IInteractable`.
 - **Collider hygiene rule** (learned the hard way): the interaction collider must tightly match the *visual* bounds — mismatched colliders make the reticle/prompt feel broken. Colliders live in the prefab, never as scene-instance additions. (Aug 2026: Tomato's collider was scene-only + offset below the visual; "Cheese" was a hacked Tomato-prefab instance — both fixed, Cheese promoted to its own prefab.)
 
