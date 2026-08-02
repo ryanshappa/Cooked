@@ -58,7 +58,7 @@ Work through phases in order; items within a phase are sized to be one sitting e
 ## Phase 1 — Counters & stations (single-player)
 - [x] `BaseCounter` abstract class implementing `IKitchenObjectParent` + `IInteractable`; `ClearCounter` is a subclass. Surfaces gained `CanAcceptKitchenObject()` so non-placeable stations (fridge) refuse placement.
 - [x] Fridge: `FridgeCounter` with hinged right-door swing (Use toggles), interior shelf stock via `IngredientGrabPoint` display props (2 Cheese, 2 Meat) that spawn fresh copies into empty hands. Generic `ContainerCounter` kept for future crates. New `Meat` KitchenObjectSO + prefab (raw steak).
-- [ ] `TrashCounter`: destroys whatever is placed/dropped in.
+- [x] Trash: `TrashBin` — scriptless physical dumpster (open-top colliders); tossed items pile up and stay (Schedule 1-style) instead of despawning. Revisit despawn at Phase 3 if piles become a problem.
 - [ ] `PlatesCounter`: spawns plates over time; player grabs a plate.
 - [ ] `Plate` kitchen object: accepts valid ingredients, tracks contents, shows stacked visuals.
 - [ ] `CuttingCounter` (bar version first): place ingredient, interact to progress cut, `CuttingRecipeSO` (input → sliced output). Physics minigame replaces the bar in Phase 2.
