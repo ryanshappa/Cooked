@@ -1,33 +1,36 @@
 # Interaction System
 
 ## Purpose
-First-person "look at a thing, press E" interaction: a camera-forward raycast decides what the player is targeting, a UI prompt shows what pressing Interact will do, and pressing it either interacts with a station or picks up / places / drops a kitchen object.
+First-person "look at a thing, press E" interaction: one camera-forward cast per frame decides what the reticle is on, one contextual action runs on Interact (pick up / place / use / drop), and the HUD prompt always describes exactly what pressing E will do — prompt and action can never disagree because they read the same target.
 
 ## Files
-- `Assets/_Assets/Scripts/IInteractable.cs` — interface: `Interact(Transform interactor)`, `GetInteractText()`, `GetTransform()`
-- `Assets/_Assets/Scripts/PlayerInteract.cs` — targeting raycast + generic interact
-- `Assets/_Assets/Scripts/PlayerPickupDrop.cs` — pickup/place/drop logic (parallel path, see issues)
-- `Assets/_Assets/Scripts/PlayerCarry.cs` — the "hands": implements `IKitchenObjectParent`, owns the hold point
+- `Assets/_Assets/Scripts/PlayerInteract.cs` — the unified system (targeting + all actions)
+- `Assets/_Assets/Scripts/IInteractable.cs` — interface for stations/props: `Interact(Transform)`, `GetInteractText()`, `GetTransform()`
+- `Assets/_Assets/Scripts/PlayerCarry.cs` — the "hands": implements `IKitchenObjectParent`, owns the camera-following hold point
 - `Assets/_Assets/Scripts/PlayerInteractUI.cs` — HUD prompt
 
+> History: this replaced the original `PlayerInteract` + `PlayerPickupDrop` pair (two parallel raycasts, two Interact bindings, different ranges and hit resolution — the source of "prompt says one thing, E does another" and "place only works dead-center"). `PlayerPickupDrop` is deleted.
+
 ## How it works
-**Targeting (`PlayerInteract`)**: every frame, spherecast (r=0.12, forgiving for thin objects) then raycast fallback from `Camera.main` forward, `maxDistance` 2.5, against `interactMask`, triggers included. Resolves `IInteractable` via `GetComponentInParent` so child colliders work. On Interact press it calls `current.Interact(transform)` — but **skips `KitchenObject` targets**, deferring those to `PlayerPickupDrop`.
+Each frame `PlayerInteract.ResolveTarget()`:
+1. Casts a **precise ray** from the camera (`maxDistance` 2.5, `interactMask`, triggers included); if it misses, retries as a small **spherecast** (`assistRadius` 0.1) for forgiveness on thin objects. Precise-first keeps the prompt honest to the reticle.
+2. All component lookups use `GetComponentInParent`, so hitting any child collider of a counter/object works.
+3. Decides one `InteractAction` for the frame:
+   - **Holding something** → hit an `IKitchenObjectParent` surface (not our own hands): **Place** if it's empty, *no action* if occupied (deliberately: never toss into a counter face). Hit anything else / nothing → **Drop** (forward toss at `dropTossSpeed`).
+   - **Empty-handed** → hit a `KitchenObject` not held by a player: **Pickup**. Else hit an `IInteractable`: **Use**.
+4. On `GameInput.IsInteractPressed()` the action executes (`SetParent(carry)` / `SetParent(surface)` / `Interact()` / `DropWithPhysics`).
 
-**Pickup/drop (`PlayerPickupDrop`)**: on Interact press (own action binding):
-- Empty-handed: raycast (camera forward, 2.2m, `interactMask`); if it hits a `KitchenObject` not already held by a player → `ko.SetParent(carry)`.
-- Holding something: if looking at an `IKitchenObjectParent` surface with free space → place (`held.SetParent(surface)`); otherwise **drop with physics** (`held.DropWithPhysics(cameraForward * 1.5f, 0)`) — a forward toss.
+`HasPrompt(out text)` exposes the contextual prompt: "Pick up Tomato", "Place Cheese" (names from `KitchenObjectSO.objectName`), the interactable's own text for Use, "Drop". `PlayerInteractUI` polls it.
 
-**Carry (`PlayerCarry`)**: creates a world-space `DynamicHoldPoint` transform in `Awake` and repositions it every frame at `camera position + camera-rotated holdOffset` (0, -0.2, 0.5). Held objects follow it (see KitchenObjectSystem.md for the follow/physics details).
-
-**Prompt (`PlayerInteractUI`)**: polls `PlayerInteract.GetInteractableObject()` each frame; shows/hides a HUD container and sets its TMP label to `GetInteractText()`.
+`PlayerCarry` is unchanged: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset`; held objects follow it (physics states in KitchenObjectSystem.md).
 
 ## Scene/Inspector wiring
-- On `Player`: `PlayerInteract` (needs `interactMask`, `GameInput` ref), `PlayerPickupDrop` (needs FP camera transform, `interactMask`, the `InputSystem_Actions` asset), `PlayerCarry` (needs FP camera transform).
-- `HUD` canvas: `PlayerInteractUI` with refs to `PlayerInteract`, the prompt container GameObject, and its `TextMeshProUGUI`.
-- Interactables (counters, kitchen objects) are on **layer 6**, which the interact masks target. Colliders may be on children; the parent holds the component.
+- `Player` GameObject: `Player`, `PlayerInteract`, `PlayerCarry` (PlayerPickupDrop removed). `PlayerInteract` needs `interactMask` (layer 6), `input` (GameInput), and optionally `cameraTransform` (falls back to `Camera.main`). `PlayerCarry` needs the FP camera transform.
+- `HUD` canvas: `PlayerInteractUI` with refs to `PlayerInteract`, prompt container, TMP label.
+- Interactables live on **layer 6**; components on the root, colliders anywhere below.
 
-## Known issues / TODO (Phase 0 target)
-- **Two parallel interaction paths.** `PlayerInteract` and `PlayerPickupDrop` both raycast every frame and both bind Interact, coordinating only via the "skip KitchenObject" special case and slightly different ranges (2.5 vs 2.2). Merge into one system: single targeting pass → context decision (use station / pick up / place / drop) → single Interact consumer through `GameInput`.
-- `PlayerPickupDrop`'s place-check uses `TryGetComponent` on the hit collider (no parent search), so a surface whose collider is on a child won't be detected — inconsistent with targeting. Fix in the merge.
-- Prompt text is static per object ("Pick up"); after the merge it should reflect the contextual action ("Place", "Take plate", …).
-- Highlight/outline on the targeted object: planned Phase 1.
+## Known issues / TODO
+- Feel tuning pending player testing: `assistRadius`, `maxDistance`, `dropTossSpeed`, hold offset smoothing.
+- Prompt for an occupied counter is currently nothing — consider a greyed "Full" hint.
+- Highlight/outline on the targeted object: Phase 1.
+- Phase 2 will extend the action set for held tools (knife/ladle) — the enum + resolve structure is designed to grow.

@@ -4,11 +4,11 @@
 Kitchen objects (ingredients, later plates/tools) are physical items that can exist in three states: **loose in the world** (full physics), **held by a player** (following the camera hold point, no collisions), or **placed on a surface** (parented to a counter's anchor point). Any holder — player hands or counter — is an `IKitchenObjectParent`.
 
 ## Files
-- `Assets/_Assets/Scripts/KitchenObject.cs` — the item itself (also `IInteractable`)
+- `Assets/_Assets/Scripts/KitchenObject.cs` — the item itself
 - `Assets/_Assets/Scripts/IKitchenObjectParent.cs` — interface: follow transform + get/set/clear/has kitchen object
 - `Assets/_Assets/Scripts/KitchenObjectSO.cs` — data: `prefab` (Transform), `sprite`, `objectName`
 - `Assets/_Assets/Scripts/ClearCounter.cs` — simplest surface: one anchor (`counterTopPoint`), one slot
-- Assets: `ScriptableObjects/KitchenObjectSO/{Tomato,Cheese}.asset`, `Prefabs/KitchenObjects/`, `Prefabs/Counters/ClearCounter.prefab`
+- Assets: `ScriptableObjects/KitchenObjectSO/{Tomato,Cheese}.asset` → `Prefabs/KitchenObjects/{Tomato,Cheese}.prefab` (each: root = KitchenObject + Rigidbody + collider sized to the visual; visual child); `Prefabs/Counters/ClearCounter.prefab`. `CheeseBlock_Visual.prefab` is visual-only (used inside Cheese.prefab).
 
 ## How it works
 `KitchenObject` caches its `Rigidbody` and all child colliders in `Awake`. State transitions happen in `SetParent(IKitchenObjectParent)`:
@@ -22,7 +22,8 @@ Kitchen objects (ingredients, later plates/tools) are physical items that can ex
 - `SetParent` also unlinks the previous parent (`ClearKitchenObject`) and links the new one (`SetKitchenObject`), keeping the parent's single slot consistent.
 - `DropWithPhysics(linearVel, angularVel)` — used by the drop action: clears the parent, re-enables physics, applies a throw velocity.
 - Ordering matters and was bug-prone: velocities must be zeroed *before* setting `isKinematic=true`, and `isKinematic=false` must be set *before* assigning velocities. Don't "simplify" this.
-- `KitchenObject.Interact` exists (IInteractable) but pickup currently goes through `PlayerPickupDrop`'s raycast instead; `PlayerInteract` explicitly skips KitchenObjects. (See InteractionSystem.md — Phase 0 merge.)
+- Pickup/place goes through the unified `PlayerInteract` (see InteractionSystem.md); `KitchenObject` no longer implements `IInteractable`.
+- **Collider hygiene rule** (learned the hard way): the interaction collider must tightly match the *visual* bounds — mismatched colliders make the reticle/prompt feel broken. Colliders live in the prefab, never as scene-instance additions. (Aug 2026: Tomato's collider was scene-only + offset below the visual; "Cheese" was a hacked Tomato-prefab instance — both fixed, Cheese promoted to its own prefab.)
 
 `KitchenObjectSO` is minimal data for now; it becomes the currency of recipes (`CuttingRecipeSO`, `RecipeSO`) in Phases 1–3. Planned Phase 0 addition: static `KitchenObject.Spawn(so, parent)` / `Destroy` helpers so all instantiation is centralized (prereq for clean NGO spawning in Phase 4).
 

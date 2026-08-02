@@ -1,65 +1,143 @@
 using UnityEngine;
 
+/// Unified first-person interaction: one cast per frame decides what the
+/// reticle is on, one contextual action runs on Interact. Replaces the old
+/// PlayerInteract + PlayerPickupDrop pair.
 public class PlayerInteract : MonoBehaviour
 {
-    [Header("Raycast")]
+    public enum InteractAction { None, Pickup, Place, Use, Drop }
+
+    [Header("Targeting")]
     [SerializeField] private float maxDistance = 2.5f;
+    [SerializeField] private float assistRadius = 0.1f;   // spherecast fallback when the precise ray misses
     [SerializeField] private LayerMask interactMask;
 
-    [Header("Input")]
+    [Header("Refs")]
     [SerializeField] private GameInput input;
+    [SerializeField] private Transform cameraTransform;   // falls back to Camera.main
 
-    Transform cam;              // <- actual rendering camera
-    IInteractable current;
+    [Header("Drop")]
+    [SerializeField] private float dropTossSpeed = 1.5f;
+
+    private PlayerCarry carry;
+
+    private InteractAction action;
+    private KitchenObject targetKitchenObject;
+    private IKitchenObjectParent targetSurface;
+    private IInteractable targetInteractable;
 
     void Awake()
     {
-        // safe fallback; we'll also refresh at Start in case Camera.main wasn't ready
-        cam = Camera.main ? Camera.main.transform : null;
-    }
-
-    void Start()
-    {
-        if (!cam) cam = Camera.main ? Camera.main.transform : null;
-        if (!cam) Debug.LogWarning("PlayerInteract: No Main Camera found. Raycasts will fail.");
+        carry = GetComponent<PlayerCarry>();
     }
 
     void Update()
     {
-        if (!cam) { cam = Camera.main ? Camera.main.transform : null; return; }
-
-        current = FindInteractable(cam);
-
-        // Debug ray
-        Debug.DrawRay(cam.position, cam.forward * maxDistance,
-                      current != null ? Color.green : Color.red);
-
-        if (current != null && input.Interact != null && input.Interact.WasPressedThisFrame())
+        if (!cameraTransform)
         {
-            // Don't interact with KitchenObjects - let PlayerPickupDrop handle those
-            if (current is KitchenObject) return;
-            
-            Debug.Log($"Interact pressed on: {current.GetTransform().name}");
-            current.Interact(transform);
+            if (Camera.main) cameraTransform = Camera.main.transform;
+            else return;
+        }
+
+        ResolveTarget();
+
+        if (input.IsInteractPressed())
+            PerformAction();
+    }
+
+    void ResolveTarget()
+    {
+        action = InteractAction.None;
+        targetKitchenObject = null;
+        targetSurface = null;
+        targetInteractable = null;
+
+        // Precise ray first so the prompt matches the reticle exactly;
+        // small spherecast as a forgiveness fallback for thin objects.
+        bool hasHit = Physics.Raycast(cameraTransform.position, cameraTransform.forward,
+                          out RaycastHit hit, maxDistance, interactMask, QueryTriggerInteraction.Collide)
+                   || Physics.SphereCast(cameraTransform.position, assistRadius, cameraTransform.forward,
+                          out hit, maxDistance, interactMask, QueryTriggerInteraction.Collide);
+
+        if (carry.HasKitchenObject())
+        {
+            if (hasHit)
+            {
+                var surface = hit.collider.GetComponentInParent<IKitchenObjectParent>();
+                if (surface != null && !ReferenceEquals(surface, carry))
+                {
+                    if (!surface.HasKitchenObject())
+                    {
+                        targetSurface = surface;
+                        action = InteractAction.Place;
+                    }
+                    // Occupied surface: no action — never toss into the counter face.
+                    return;
+                }
+            }
+            action = InteractAction.Drop;
+        }
+        else
+        {
+            if (!hasHit) return;
+
+            var ko = hit.collider.GetComponentInParent<KitchenObject>();
+            if (ko != null && ko.GetParent() is not PlayerCarry)
+            {
+                targetKitchenObject = ko;
+                action = InteractAction.Pickup;
+                return;
+            }
+
+            var interactable = hit.collider.GetComponentInParent<IInteractable>();
+            if (interactable != null)
+            {
+                targetInteractable = interactable;
+                action = InteractAction.Use;
+            }
         }
     }
 
-    public IInteractable GetInteractableObject() => current;
-
-    IInteractable FindInteractable(Transform cameraTf)
+    void PerformAction()
     {
-        var origin = cameraTf.position;
-        var dir    = cameraTf.forward;
+        switch (action)
+        {
+            case InteractAction.Pickup:
+                targetKitchenObject.SetParent(carry);
+                break;
+            case InteractAction.Place:
+                carry.GetKitchenObject().SetParent(targetSurface);
+                break;
+            case InteractAction.Use:
+                targetInteractable.Interact(transform);
+                break;
+            case InteractAction.Drop:
+                carry.GetKitchenObject().DropWithPhysics(cameraTransform.forward * dropTossSpeed, Vector3.zero);
+                break;
+        }
+    }
 
-        // spherecast is forgiving for thin edges
-        if (Physics.SphereCast(origin, 0.12f, dir, out var hit, maxDistance,
-                               interactMask, QueryTriggerInteraction.Collide))
-            return hit.collider.GetComponentInParent<IInteractable>();
+    public InteractAction GetCurrentAction() => action;
 
-        if (Physics.Raycast(origin, dir, out hit, maxDistance,
-                            interactMask, QueryTriggerInteraction.Collide))
-            return hit.collider.GetComponentInParent<IInteractable>();
-
-        return null;
+    public bool HasPrompt(out string text)
+    {
+        switch (action)
+        {
+            case InteractAction.Pickup:
+                text = $"Pick up {targetKitchenObject.GetKitchenObjectSO().objectName}";
+                return true;
+            case InteractAction.Place:
+                text = $"Place {carry.GetKitchenObject().GetKitchenObjectSO().objectName}";
+                return true;
+            case InteractAction.Use:
+                text = targetInteractable.GetInteractText();
+                return true;
+            case InteractAction.Drop:
+                text = "Drop";
+                return true;
+            default:
+                text = null;
+                return false;
+        }
     }
 }

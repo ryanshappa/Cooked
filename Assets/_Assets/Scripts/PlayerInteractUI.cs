@@ -9,11 +9,10 @@ public class PlayerInteractUI : MonoBehaviour
 
     void Update()
     {
-        var i = playerInteract.GetInteractableObject();
-        if (i != null)
+        if (playerInteract.HasPrompt(out string text))
         {
             container.SetActive(true);
-            label.text = i.GetInteractText();
+            label.text = text;
         }
         else
         {

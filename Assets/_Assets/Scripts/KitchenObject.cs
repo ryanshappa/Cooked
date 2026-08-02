@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class KitchenObject : MonoBehaviour, IInteractable
+public class KitchenObject : MonoBehaviour
 {
     [SerializeField] private KitchenObjectSO kitchenObjectSO;
 
@@ -12,21 +12,6 @@ public class KitchenObject : MonoBehaviour, IInteractable
     {
         rb   = GetComponent<Rigidbody>();
         cols = GetComponentsInChildren<Collider>();
-    }
-
-    // ----- IInteractable -----
-    public string   GetInteractText() => $"Pick up";
-    public Transform GetTransform()   => transform;
-
-    public void Interact(Transform interactor)
-    {
-        // Don't allow interaction if already held by someone (but counters are OK)
-        if (parent != null && parent is PlayerCarry) return;
-        
-        var carry = interactor.GetComponent<PlayerCarry>();
-        if (carry == null || carry.HasKitchenObject()) return;
-
-        SetParent(carry);
     }
 
     // ----- Parent plumbing -----

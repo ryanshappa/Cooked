@@ -11,7 +11,7 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `Main Camera` — Camera + AudioListener + URP camera data + **CinemachineBrain**
 - `FirstPersonCamera` — CinemachineCamera + HardLockToTarget (position) + PanTilt (aim) + InputAxisController; the FP view rig
 - `Directional Light`, `Global Volume` (URP post), `Floor` (mesh + MeshCollider)
-- `Player` — `Player`, `PlayerInteract`, `PlayerCarry`, `PlayerPickupDrop`; children: head anchor/visual rig (Animator for `PlayerAnimator`)
+- `Player` — `Player`, `PlayerInteract`, `PlayerCarry`; children: head anchor/visual rig (Animator for `PlayerAnimator`)
 - `GameInput` — `GameInput` component with `InputSystem_Actions` assigned
 - `HUD` — Canvas + `PlayerInteractUI` (interact prompt container + TMP label)
 
