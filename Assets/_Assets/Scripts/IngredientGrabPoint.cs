@@ -5,11 +5,11 @@ using UnityEngine;
 public class IngredientGrabPoint : MonoBehaviour, IInteractable
 {
     [SerializeField] private KitchenObjectSO kitchenObjectSO;
-    [SerializeField] private FridgeCounter fridge;   // optional: only grabbable while the fridge is open
+    [SerializeField] private FridgeDoor door;   // optional: only grabbable while this door is open
 
     public void Interact(Transform interactor)
     {
-        if (fridge != null && !fridge.IsOpen) return;
+        if (door != null && !door.IsOpen) return;
 
         var carry = interactor.GetComponent<PlayerCarry>();
         if (carry == null || carry.HasKitchenObject()) return;

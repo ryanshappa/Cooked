@@ -77,21 +77,28 @@ public class KitchenObject : MonoBehaviour
                 if (cols != null) foreach (var c in cols) c.enabled = false;
                 if (rb)
                 {
-                    rb.linearVelocity  = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                    rb.isKinematic     = true;  // Set kinematic AFTER clearing velocities
+                    if (!rb.isKinematic)
+                    {
+                        rb.linearVelocity  = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                    }
+                    rb.isKinematic = true;
                 }
                 transform.SetParent(null); // world space; Update() glues it to the hold point
             }
             else
             {
-                // Counters and static surfaces: snap to the anchor
+                // Counters and static surfaces: snap to the anchor as an immovable
+                // display — kinematic so collisions (tossed items) can never shove
+                // it off the counter. Colliders stay on so it's targetable.
                 if (rb)
                 {
-                    rb.isKinematic = false; // Make dynamic FIRST
-                    rb.linearVelocity  = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                    rb.useGravity = false; // No gravity so it stays on the anchor
+                    if (!rb.isKinematic)
+                    {
+                        rb.linearVelocity  = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                    }
+                    rb.isKinematic = true;
                 }
                 if (cols != null) foreach (var c in cols) c.enabled = true;
 

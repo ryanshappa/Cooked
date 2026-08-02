@@ -21,11 +21,14 @@ Station catalog (grows through Phase 1):
 |---|---|---|---|
 | `ClearCounter` | nothing | yes | pure surface |
 | `ContainerCounter` | spawns its `kitchenObjectSO` into the player's hands | **no** | generic instant dispenser — currently unused (kept for crates/simple sources); `OnPlayerGrabbedObject` event |
-| `FridgeCounter` (fridge) | toggles the right door (eased hinge swing, `openAngle` 100°) | **no** | ingredients inside are `IngredientGrabPoint` display props |
+| `FridgeCounter` (fridge body) | nothing (doors handle interaction) | **no** | body is just a blocker/anchor for the doors + stock |
+| `FridgeDoor` (per door) | toggles that door (eased hinge swing; right +100°, left −100°) | n/a | to close, click the open door again — its collider swings with it |
 
-**`IngredientGrabPoint`** (`IngredientGrabPoint.cs`): a display prop on a fridge shelf. Use with empty hands → `KitchenObject.Spawn` of its SO into your grip; the prop never depletes (it's "stock"). Gated on `fridge.IsOpen`, though the closed door's collider blocks the ray anyway. Current stock: 2× Cheese (upper shelf), 2× Meat (raw steak, shelf below).
+**`IngredientGrabPoint`** (`IngredientGrabPoint.cs`): a display prop on a fridge shelf. Use with empty hands → `KitchenObject.Spawn` of its SO into your grip; the prop never depletes (it's "stock"). Gated on its compartment's `door.IsOpen` (the closed door's collider also physically blocks the ray). Current stock — right compartment: 2× Cheese (top shelf), 2× Meat (raw steak, shelf below); left compartment: 2× Tomato (top shelf).
 
-**Fridge internals** (`Prefabs/Counters/Prop_Fridge_01.prefab`): the Pandazole door meshes have their origin at the hinge edge, so the right door (`_p02`) is driven directly by yaw — no pivot re-parenting. Body collider is split in two (left half full-depth, right half rear-only) so the right-front opening is raycast-reachable when the door is open; the door has its own thin collider. Clicking anywhere on the body/door toggles the door; clicking a shelf item takes it.
+**Fridge internals** (`Prefabs/Counters/Prop_Fridge_01.prefab`): the Pandazole door meshes have their origin at the hinge edge, so each door is driven directly by yaw — no pivot re-parenting. Both body-half colliders are rear-only slabs, leaving the front openings raycast-reachable when a door is open; each door has its own thin collider. Shelf tops sit at local y **0.48 / 0.83 / 1.18 / 1.54** (extracted from mesh vertices) — place stock at exactly these heights.
+
+**`KitchenTable` (multi-slot surface)** (`Prefabs/Counters/KitchenTable.prefab`): the pattern for surfaces with several snap points — root wraps the pack visual (nested prefab), plus one child **slot** per snap position (`Slot_L`, `Slot_R`), each being its own `ClearCounter` with a half-tabletop collider (raised above the surface so aim hits it) and its own `CounterTopPoint`. Aiming at a half places into that half; no interaction-code changes needed since each slot is just a counter.
 
 Planned next (see CLAUDE.md Phase 1): TrashCounter, PlatesCounter, CuttingCounter (bar v1), StoveCounter (bar v1), DeliveryCounter.
 
@@ -35,7 +38,7 @@ Planned next (see CLAUDE.md Phase 1): TrashCounter, PlatesCounter, CuttingCounte
 - The fridge prefab has ContainerCounter on the root with Cheese assigned; scene instance inherits.
 
 ## Known issues / TODO
-- Fridge door has no sound yet; left door is static (could become a second compartment later).
-- Aiming at the fridge *interior body* (between items) with empty hands toggles the door closed — convenient but possibly annoying; revisit after playtesting.
+- Fridge doors have no sound yet.
+- Both compartments now open independently; clicking the fridge body does nothing (no accidental door toggles while reaching for items).
 - Selected-counter highlight visual still pending (Phase 1 item).
 - One slot per counter stays the rule until plates (which get their own contents model).

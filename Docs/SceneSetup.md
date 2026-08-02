@@ -20,7 +20,8 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `Tomato` (KitchenObject + Rigidbody + SphereCollider), `Cheese` (KitchenObject + Rigidbody + BoxCollider)
 
 **Props:**
-- `Prop_Fridge_01` — **FridgeCounter**: openable right door + grab-able shelf stock (2 Cheese, 2 Meat), layer 6. ⚠️ The scene instance must come from `_Assets/Prefabs/Counters/Prop_Fridge_01.prefab` — an identical-looking instance of the *Pandazole pack* prefab was silently in the scene for a while (pack prefabs get none of our components).
+- `Prop_Fridge_01` — **FridgeCounter** body + two independent **FridgeDoor**s; shelf stock: Cheese+Meat (right), Tomato (left), layer 6. ⚠️ Scene instances must come from `_Assets/Prefabs/Counters/` — identical-looking *Pandazole pack* prefab instances were silently in the scene (fridge AND table); pack prefabs get none of our components.
+- `KitchenTable` — two-slot placing surface (`Slot_L`/`Slot_R`, each a ClearCounter), replaces the old pack-prefab `Prop_KitchenTable_01` instance.
 - `Bake` — pizza oven from the PizzA pack (future StoveCounter/oven)
 - `Prop_KitchenTable_01`, `Prop_TrayHolder`, `Prop_KitchenCabinet_01`, `Kitchen_tabla_01`
 - Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`

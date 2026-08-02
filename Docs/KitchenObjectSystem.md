@@ -16,7 +16,7 @@ Kitchen objects (ingredients, later plates/tools) are physical items that can ex
 | State | Physics | Transform |
 |---|---|---|
 | Held by `PlayerCarry` | colliders **off**, rb kinematic (velocities zeroed first) | unparented; `Update()` glues it to the hold point each frame (zero lag), centering the item's **collider-bounds center** (cached `localCenter`) on the reticle — not the pivot, because these models' pivots are offset |
-| On a counter/surface | colliders **on** (needed so you can target it), rb dynamic but `useGravity=false` | parented to the surface's follow transform, local pos/rot zeroed |
+| On a counter/surface | colliders **on** (needed so you can target it), rb **kinematic** — immovable, so tossed items can never shove it off (dynamic-no-gravity caused placed items to drift when hit) | parented to the surface's follow transform, local pos/rot zeroed |
 | Loose (dropped) | colliders on, rb dynamic + gravity | unparented |
 
 - **Feel note (Aug 2026):** a velocity-steered "fully physical" carry (colliders on, dynamic rb chasing the hold point) was tried and reverted — the follow lag made the item drift into the camera when walking. Zero-lag glued carry with colliders off is the shipped feel; held items may visually clip geometry and that's accepted. Don't re-attempt without a new idea for the lag problem.
