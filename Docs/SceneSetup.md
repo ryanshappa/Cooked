@@ -3,7 +3,7 @@
 ## Purpose
 Snapshot of what's in the active scene and how it's wired, so either machine can reproduce or continue the setup. Update when the scene composition meaningfully changes.
 
-**Scene:** `Assets/Scenes/SampleScene.unity` (to be renamed `GameScene` in Phase 0; not yet in Build Settings).
+**Scene:** `Assets/Scenes/GameScene.unity` (renamed from SampleScene, GUID preserved; not yet in Build Settings).
 
 ## Contents (root objects)
 
@@ -19,8 +19,8 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `ClearCounter`, `ClearCounter (1)` — BoxCollider + `ClearCounter`, child `counterTopPoint`
 - `Tomato` (KitchenObject + Rigidbody + SphereCollider), `Cheese` (KitchenObject + Rigidbody + BoxCollider)
 
-**Props (no gameplay components yet):**
-- `Prop_Fridge_01` (untracked prefab at `Assets/_Assets/Prefabs/Counters/` — future ContainerCounter)
+**Props:**
+- `Prop_Fridge_01` — now a **ContainerCounter** (dispenses Cheese), layer 6
 - `Bake` — pizza oven from the PizzA pack (future StoveCounter/oven)
 - `Prop_KitchenTable_01`, `Prop_TrayHolder`, `Prop_KitchenCabinet_01`, `Kitchen_tabla_01`
 - Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`

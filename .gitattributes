@@ -1,6 +1,41 @@
-*.unity merge=unityyamlmerge
-*.prefab merge=unityyamlmerge
-*.asset merge=unityyamlmerge
-*.mat merge=unityyamlmerge
-*.anim merge=unityyamlmerge
-*.controller merge=unityyamlmerge
+# Normalize line endings across Mac/PC
+* text=auto
+
+# Unity YAML assets — keep as text (Force Text serialization) and use Unity's
+# Smart Merge when configured (falls back to normal merge otherwise)
+*.unity text merge=unityyamlmerge
+*.prefab text merge=unityyamlmerge
+*.asset text merge=unityyamlmerge
+*.mat text merge=unityyamlmerge
+*.anim text merge=unityyamlmerge
+*.controller text merge=unityyamlmerge
+*.meta text
+*.inputactions text
+*.shader text
+*.cs text
+*.md text
+*.json text
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tga binary
+*.psd binary
+*.tif binary
+*.exr binary
+*.hdr binary
+*.fbx binary
+*.obj binary
+*.blend binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.aif binary
+*.ttf binary
+*.otf binary
+*.dll binary
+*.a binary
+*.so binary
+
+# Git LFS deliberately not used yet — repo is small; revisit if clone size becomes a problem.

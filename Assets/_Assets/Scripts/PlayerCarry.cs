@@ -26,6 +26,7 @@ public class PlayerCarry : MonoBehaviour, IKitchenObjectParent
     }
 
     public Transform GetKitchenObjectFollowTransform() => dynamicHoldPoint;
+    public bool CanAcceptKitchenObject() => true;
     public void SetKitchenObject(KitchenObject obj) => held = obj;
     public KitchenObject GetKitchenObject() => held;
     public void ClearKitchenObject() => held = null;

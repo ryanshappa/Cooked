@@ -69,12 +69,12 @@ public class PlayerInteract : MonoBehaviour
                 var surface = hit.collider.GetComponentInParent<IKitchenObjectParent>();
                 if (surface != null && !ReferenceEquals(surface, carry))
                 {
-                    if (!surface.HasKitchenObject())
+                    if (!surface.HasKitchenObject() && surface.CanAcceptKitchenObject())
                     {
                         targetSurface = surface;
                         action = InteractAction.Place;
                     }
-                    // Occupied surface: no action — never toss into the counter face.
+                    // Occupied or non-accepting surface: no action — never toss into the counter face.
                     return;
                 }
             }

@@ -47,17 +47,17 @@ First-person controller with capsule-cast collision (`Player.cs`), Cinemachine F
 
 Work through phases in order; items within a phase are sized to be one sitting each. Check items off as they land, and split anything that turns out bigger than expected. Single-player-first: Phases 0–3 build the whole game loop offline; multiplayer conversion is its own phase (per Code Monkey's course, converting a finished SP game to NGO is very doable if we keep logic event-driven and centralized).
 
-## Phase 0 — Foundation cleanup
-- [ ] **Upgrade to Unity 6.5** (clean working tree first; upgrade on one machine, commit, install identical version on the other — `Docs/PLAN.md` Decision 1). Update NGO + Input System packages while at it.
-- [ ] Merge `PlayerInteract` + `PlayerPickupDrop` into one interaction flow: a single raycast per frame producing "what am I looking at," with pickup/place/use decided by context; all input through `GameInput`.
-- [ ] Formalize Layers (`Interactable`, `KitchenObject`, `Player`, …) and the physics collision matrix; set all raycast masks from them consistently.
-- [ ] Rename `SampleScene` → `GameScene`; commit the dirty scene + `Prop_Fridge_01` prefab; add `Assets/Screenshots/` to `.gitignore` (MCP screenshot output).
-- [ ] Add `.gitattributes` with Git LFS for binary assets (fbx/png/wav/psd) and confirm Force Text asset serialization for cross-machine safety.
-- [ ] Create `KitchenObject.Spawn/Destroy` static helpers (SO → instance) so later code never hand-instantiates prefabs (this also makes the NGO conversion far easier).
+## Phase 0 — Foundation cleanup ✅ (completed Aug 2026)
+- [x] **Upgrade to Unity 6.5** — on 6000.5.2f1; Cinemachine 3.1.7, NGO 2.13.1, Input System 1.20.0.
+- [x] Merge `PlayerInteract` + `PlayerPickupDrop` into one interaction flow (one cast → contextual Pickup/Place/Use/Drop, all input via `GameInput`). Text prompts later removed by design — crosshair only.
+- [x] Formalize Layers: 3 `PlayerBody`, 6 `Interactable`, 8 `Held` (see `Docs/SceneSetup.md`); interact/collision masks set from them. Watch-out: Main Camera has a hand-picked culling mask — new layers must be added to it.
+- [x] Rename scene → `GameScene`; committed fridge prefab; gitignored `Assets/Screenshots/`.
+- [x] Add `.gitattributes` (text normalization + binary marking; Force Text confirmed). LFS deliberately deferred — repo is small; revisit if clone size grows.
+- [x] `KitchenObject.Spawn/DestroySelf` helpers — the only sanctioned create/destroy path.
 
 ## Phase 1 — Counters & stations (single-player)
-- [ ] `BaseCounter` abstract class implementing `IKitchenObjectParent` + `IInteractable`; `ClearCounter` becomes a subclass.
-- [ ] `ContainerCounter` / fridge: interact to take a `KitchenObjectSO` ingredient (wire the existing fridge prop to it).
+- [x] `BaseCounter` abstract class implementing `IKitchenObjectParent` + `IInteractable`; `ClearCounter` is a subclass. Surfaces gained `CanAcceptKitchenObject()` so non-placeable stations (fridge) refuse placement.
+- [x] `ContainerCounter` / fridge: Use with empty hands spawns its `KitchenObjectSO` (currently Cheese) into them; `OnPlayerGrabbedObject` event ready for door-anim/sound.
 - [ ] `TrashCounter`: destroys whatever is placed/dropped in.
 - [ ] `PlatesCounter`: spawns plates over time; player grabs a plate.
 - [ ] `Plate` kitchen object: accepts valid ingredients, tracks contents, shows stacked visuals.

@@ -23,9 +23,9 @@ Each system doc covers:
 - [KitchenObjectSystem.md](KitchenObjectSystem.md) — kitchen objects, parents/surfaces, `KitchenObjectSO` data
 - [SceneSetup.md](SceneSetup.md) — current test scene contents and wiring
 - [Minigames.md](Minigames.md) — physics cooking minigames + PrepScore grading framework (design doc; Phase 2 builds it)
+- [Counters.md](Counters.md) — BaseCounter + station catalog (ClearCounter, ContainerCounter/fridge)
 
 ### Planned (create when the system is built)
-- Counters.md — BaseCounter and all station types (Phase 1)
 - OrdersAndScoring.md — recipes, order manager, scoring/money (Phase 3)
 - GameLoop.md — GameManager state machine, modes (Phases 3 & 9)
 - Multiplayer.md — NGO architecture, authority model, UGS Lobby/Relay (Phase 4)

@@ -1,15 +1,7 @@
 using UnityEngine;
 
-public class ClearCounter : MonoBehaviour, IKitchenObjectParent
+/// Plain work surface: holds one kitchen object on its counterTopPoint.
+/// All behavior lives in BaseCounter.
+public class ClearCounter : BaseCounter
 {
-    [SerializeField] private Transform counterTopPoint;
-
-    private KitchenObject kitchenObject;
-
-    // IKitchenObjectParent
-    public Transform GetKitchenObjectFollowTransform() => counterTopPoint;
-    public void SetKitchenObject(KitchenObject obj) => kitchenObject = obj;
-    public KitchenObject GetKitchenObject() => kitchenObject;
-    public void ClearKitchenObject() => kitchenObject = null;
-    public bool HasKitchenObject() => kitchenObject != null;
 }

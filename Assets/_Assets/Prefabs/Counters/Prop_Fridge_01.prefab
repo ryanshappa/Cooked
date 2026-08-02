@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 2192571780254428157}
   - component: {fileID: 2154604531420162636}
   - component: {fileID: 3207402090053287643}
-  m_Layer: 0
+  - component: {fileID: 4297466940096742329}
+  m_Layer: 6
   m_Name: Prop_Fridge_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64,6 +65,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -85,9 +88,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &3207402090053287643
 BoxCollider:
@@ -110,6 +115,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.6098872, y: 2.3331351, z: 0.8816388}
   m_Center: {x: 0, y: 1.1451898, z: 0.023258686}
+--- !u!114 &4297466940096742329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386163425989443843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f14d160b7503b408ebd9516e79941c46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContainerCounter
+  counterTopPoint: {fileID: 0}
+  kitchenObjectSO: {fileID: 11400000, guid: 197ab0cdf1de318428bd5ead196e4d4b, type: 2}
 --- !u!1 &3683136672467275747
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,7 +140,7 @@ GameObject:
   - component: {fileID: 2921713220655553568}
   - component: {fileID: 7381942451829828086}
   - component: {fileID: 3557973428288205419}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Prop_Fridge_01_p03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -171,6 +190,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -192,9 +213,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4448809427851028971
 GameObject:
@@ -207,7 +230,7 @@ GameObject:
   - component: {fileID: 3393518405041966684}
   - component: {fileID: 2911630650715566897}
   - component: {fileID: 1433516534232893375}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Prop_Fridge_01_p02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,6 +280,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -278,7 +303,9 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}

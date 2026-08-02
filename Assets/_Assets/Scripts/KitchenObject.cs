@@ -27,6 +27,24 @@ public class KitchenObject : MonoBehaviour
     public IKitchenObjectParent GetParent() => parent;
     public KitchenObjectSO GetKitchenObjectSO() => kitchenObjectSO;
 
+    /// The only sanctioned way to create a kitchen object from data.
+    /// Centralized so the Phase 4 network conversion has a single spawn seam.
+    public static KitchenObject Spawn(KitchenObjectSO so, IKitchenObjectParent parent = null)
+    {
+        var instance = Instantiate(so.prefab);
+        var ko = instance.GetComponent<KitchenObject>();
+        if (parent != null) ko.SetParent(parent);
+        return ko;
+    }
+
+    /// The only sanctioned way to destroy a kitchen object (unlinks its parent first).
+    public void DestroySelf()
+    {
+        if (parent != null && parent.GetKitchenObject() == this)
+            parent.ClearKitchenObject();
+        Destroy(gameObject);
+    }
+
     void Update()
     {
         // Held: glued to the hold point every frame (zero lag), centered on the reticle.
