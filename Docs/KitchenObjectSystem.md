@@ -13,13 +13,13 @@ Kitchen objects (ingredients, later plates/tools) are physical items that can ex
 ## How it works
 `KitchenObject` caches its `Rigidbody` and all child colliders in `Awake`. State transitions happen in `SetParent(IKitchenObjectParent)`:
 
-| State | Physics | Transform / layer |
+| State | Physics | Transform |
 |---|---|---|
-| Held by `PlayerCarry` | colliders **on**, rb dynamic (no gravity, ContinuousDynamic) — **velocity-steered to the hold point** in `FixedUpdate`, so a held item is fully physical and can never phase through counters/walls | unparented, moved to layer **Held** (8) so the player's movement capsule-casts and the interaction ray ignore it |
-| On a counter/surface | colliders **on** (needed so you can target it), rb dynamic but `useGravity=false` | parented to the surface's follow transform, local pos/rot zeroed; back on its original layer |
-| Loose (dropped) | colliders on, rb dynamic + gravity | unparented, original layer |
+| Held by `PlayerCarry` | colliders **off**, rb kinematic (velocities zeroed first) | unparented; `Update()` glues it to the hold point each frame (zero lag), centering the item's **collider-bounds center** (cached `localCenter`) on the reticle — not the pivot, because these models' pivots are offset |
+| On a counter/surface | colliders **on** (needed so you can target it), rb dynamic but `useGravity=false` | parented to the surface's follow transform, local pos/rot zeroed |
+| Loose (dropped) | colliders on, rb dynamic + gravity | unparented |
 
-- **Held follow**: pulls the item's *collider-bounds center* (cached `localCenter` in `Awake`) onto the hold point — not the pivot, because these models' pivots are offset — via `linearVelocity = clamp((target − pos) × followStrength)` and matching `angularVelocity`. Tunables on the component: `followStrength` (20), `maxFollowSpeed` (15), `rotateStrength` (15). Colliding with geometry pushes the item aside; it springs back — that's the intended physical feel.
+- **Feel note (Aug 2026):** a velocity-steered "fully physical" carry (colliders on, dynamic rb chasing the hold point) was tried and reverted — the follow lag made the item drift into the camera when walking. Zero-lag glued carry with colliders off is the shipped feel; held items may visually clip geometry and that's accepted. Don't re-attempt without a new idea for the lag problem.
 - `SetParent` also unlinks the previous parent (`ClearKitchenObject`) and links the new one (`SetKitchenObject`), keeping the parent's single slot consistent.
 - `DropWithPhysics(linearVel, angularVel)` — used by the drop action: clears the parent, restores layer/gravity, applies a throw velocity.
 - Ordering matters and was bug-prone: `isKinematic=false` must be set *before* assigning velocities. Don't "simplify" this.

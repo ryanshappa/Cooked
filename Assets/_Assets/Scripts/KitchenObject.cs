@@ -4,23 +4,15 @@ public class KitchenObject : MonoBehaviour
 {
     [SerializeField] private KitchenObjectSO kitchenObjectSO;
 
-    [Header("Held physics follow")]
-    [SerializeField] private float followStrength = 20f;   // how hard the item is pulled to the hold point
-    [SerializeField] private float maxFollowSpeed = 15f;
-    [SerializeField] private float rotateStrength = 15f;
-
     private IKitchenObjectParent parent;
     private Rigidbody rb;
     private Collider[] cols;
-    private int originalLayer;
     private Vector3 localCenter;   // combined collider center in root-local space
 
     void Awake()
     {
         rb   = GetComponent<Rigidbody>();
         cols = GetComponentsInChildren<Collider>();
-        originalLayer = gameObject.layer;
-        if (rb) rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         // Cache the collider-bounds center so a held item centers its BODY on the
         // hold point, not its pivot (pivots on these models are often offset).
@@ -35,26 +27,17 @@ public class KitchenObject : MonoBehaviour
     public IKitchenObjectParent GetParent() => parent;
     public KitchenObjectSO GetKitchenObjectSO() => kitchenObjectSO;
 
-    void FixedUpdate()
+    void Update()
     {
-        // Physics-driven carry: the item stays a real collider-enabled body and is
-        // steered to the hold point by velocity, so it can never pass through geometry.
-        if (parent is PlayerCarry playerCarry && rb != null)
+        // Held: glued to the hold point every frame (zero lag), centered on the reticle.
+        if (parent is PlayerCarry playerCarry)
         {
             var follow = playerCarry.GetKitchenObjectFollowTransform();
-            if (follow == null) return;
-
-            Quaternion targetRot = follow.rotation;
-            Vector3 targetPos = follow.position - targetRot * Vector3.Scale(localCenter, transform.lossyScale);
-
-            rb.linearVelocity = Vector3.ClampMagnitude((targetPos - rb.position) * followStrength, maxFollowSpeed);
-
-            Quaternion delta = targetRot * Quaternion.Inverse(rb.rotation);
-            delta.ToAngleAxis(out float angle, out Vector3 axis);
-            if (angle > 180f) angle -= 360f;
-            rb.angularVelocity = (angle != 0f && !float.IsInfinity(axis.x))
-                ? axis.normalized * (angle * Mathf.Deg2Rad * rotateStrength)
-                : Vector3.zero;
+            if (follow != null)
+            {
+                transform.rotation = follow.rotation;
+                transform.position = follow.position - follow.rotation * Vector3.Scale(localCenter, transform.lossyScale);
+            }
         }
     }
 
@@ -72,32 +55,25 @@ public class KitchenObject : MonoBehaviour
         {
             if (newParent is PlayerCarry)
             {
-                // Held: stays fully physical (colliders ON, dynamic body), but moves to
-                // the "Held" layer so the player's movement casts and the interaction
-                // ray ignore it.
-                SetLayerRecursive(LayerMask.NameToLayer("Held"));
-                if (cols != null) foreach (var c in cols) c.enabled = true;
+                // For player carrying, disable physics & collisions
+                if (cols != null) foreach (var c in cols) c.enabled = false;
                 if (rb)
                 {
-                    rb.isKinematic = false;
-                    rb.useGravity = false;
-                    rb.linearVelocity = Vector3.zero;
+                    rb.linearVelocity  = Vector3.zero;
                     rb.angularVelocity = Vector3.zero;
-                    rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+                    rb.isKinematic     = true;  // Set kinematic AFTER clearing velocities
                 }
-                transform.SetParent(null); // world space; FixedUpdate steers it
+                transform.SetParent(null); // world space; Update() glues it to the hold point
             }
             else
             {
                 // Counters and static surfaces: snap to the anchor
-                SetLayerRecursive(originalLayer);
                 if (rb)
                 {
                     rb.isKinematic = false; // Make dynamic FIRST
-                    rb.linearVelocity = Vector3.zero;
+                    rb.linearVelocity  = Vector3.zero;
                     rb.angularVelocity = Vector3.zero;
                     rb.useGravity = false; // No gravity so it stays on the anchor
-                    rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
                 }
                 if (cols != null) foreach (var c in cols) c.enabled = true;
 
@@ -112,14 +88,12 @@ public class KitchenObject : MonoBehaviour
         else
         {
             // released to world
-            SetLayerRecursive(originalLayer);
             transform.SetParent(null);
             if (cols != null) foreach (var c in cols) c.enabled = true;
             if (rb)
             {
                 rb.isKinematic = false;
                 rb.useGravity = true;
-                rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
             }
         }
     }
@@ -130,24 +104,15 @@ public class KitchenObject : MonoBehaviour
             parent.ClearKitchenObject();
         parent = null;
 
-        SetLayerRecursive(originalLayer);
         transform.SetParent(null);
         if (cols != null) foreach (var c in cols) c.enabled = true;
 
         if (rb)
         {
             rb.isKinematic = false;
-            rb.useGravity = true;
-            rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-            rb.linearVelocity = linearVelocity;
+            rb.useGravity  = true;
+            rb.linearVelocity  = linearVelocity;
             rb.angularVelocity = angularVelocity;
         }
-    }
-
-    private void SetLayerRecursive(int layer)
-    {
-        if (layer < 0) return;
-        foreach (var t in GetComponentsInChildren<Transform>(true))
-            t.gameObject.layer = layer;
     }
 }

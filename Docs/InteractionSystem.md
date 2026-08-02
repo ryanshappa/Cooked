@@ -22,7 +22,7 @@ Each frame `PlayerInteract.ResolveTarget()`:
 
 `HasPrompt(out text)` exposes a contextual prompt string ("Pick up Tomato", "Place Cheese", …). **The HUD no longer renders it** — text prompts were removed by design (Aug 2026): the plain crosshair is the only aim feedback; physical affordances carry the meaning. The API and `PlayerInteractUI.cs` are kept for the break-room practice stations (Phase 7), where wordy tutorial prompts are welcome.
 
-`PlayerCarry`: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset` — set to **(0, 0, 0.6)**, i.e. dead-center on the reticle. Held objects are *physically steered* to it (velocity-based follow, colliders on, layer `Held` — see KitchenObjectSystem.md), so what you carry sits on the cursor and collides with the world.
+`PlayerCarry`: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset` — set to **(0, 0, 0.7)**, i.e. dead-center on the reticle. Held objects glue to it with zero lag, centered by collider bounds (see KitchenObjectSystem.md).
 
 ## Scene/Inspector wiring
 - `Player` GameObject: `Player`, `PlayerInteract`, `PlayerCarry` (PlayerPickupDrop removed). `PlayerInteract` needs `interactMask` (layer 6), `input` (GameInput), and optionally `cameraTransform` (falls back to `Camera.main`). `PlayerCarry` needs the FP camera transform.
