@@ -24,3 +24,7 @@ Thumbs.db
 # Plastic/UVC
 .plastic/
 ignore.conf
+
+# MCP screenshot output
+Assets/Screenshots/
+Assets/Screenshots.meta
