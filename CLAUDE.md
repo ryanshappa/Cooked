@@ -67,7 +67,8 @@ Work through phases in order; items within a phase are sized to be one sitting e
 - [ ] Selected-counter/object highlight visual driven by the unified interaction system.
 
 ## Phase 2 — Physics cooking minigames (the core twist)
-Design doc first: `Docs/Minigames.md` — one page per minigame defining verbs, physics setup, success criteria, failure states, and how it degrades on network latency.
+Design doc: `Docs/Minigames.md` (written — grading framework + per-minigame designs). This phase is the game's identity; give it the most iteration time.
+- [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, stack alignment), weights/tiers in `PrepQualitySO` data; scores stamp the prepped component and roll up into order payout in Phase 3. See `Docs/Minigames.md`.
 - [ ] **Held-tool system**: player can hold tools (knife, spatula, sauce ladle) with first-person animations; extend carry system to distinguish tools from ingredients.
 - [ ] **Chopping v1**: knife follows a constrained swing; ingredient starts as pre-cut chunks joined by breakable fixed joints (real mesh slicing later only if worth it). Cut quality = slice count/evenness.
 - [ ] **Sauce spreading v1**: pizza dough with a coverage mask; ladle/brush paints sauce (raycast splat-map), success = % coverage.

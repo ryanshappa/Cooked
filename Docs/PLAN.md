@@ -26,7 +26,7 @@ Reasoning:
 
 ## Decision 2 — Multiplayer: Netcode for GameObjects + Unity Multiplayer Services SDK (Sessions), Steamworks later as a transport swap
 
-**Choice: NGO 2.x (client-hosted, server-authoritative) + `com.unity.services.multiplayer` (the Sessions API, which bundles Auth/Lobby/Relay) for connectivity. Facepunch Steamworks enters later, at Steam-release time, as an alternate transport + platform layer — not as the netcode. Photon Quantum: no.**
+**Choice: NGO 2.x (client-hosted, server-authoritative) as the netcode — with the transport treated as deliberately swappable. Develop against Unity Transport + Relay/Sessions (no Steam appid needed, works in-editor with Multiplayer Play Mode/ParrelSync); at launch, drop in the community Facepunch Steamworks transport from Unity's [multiplayer-community-contributions](https://github.com/Unity-Technologies/multiplayer-community-contributions) repo for Steam invites and friend lists. Don't pick one transport and commit — NGO sitting on a swappable transport layer is the point of choosing it. Photon Quantum: no.**
 
 The options considered:
 
@@ -54,7 +54,7 @@ Architecture decisions locked in now (details will live in `Multiplayer.md` when
 1. Add `com.unity.services.multiplayer` when Phase 4 begins; link the Unity Cloud project ID; anonymous auth.
 2. Build `MultiplayerBootstrap`: create session (host) / join by code / quick join, exposing plain C# events to the rest of the game.
 3. Convert Player → KitchenObject → counters → managers, in that order (per roadmap).
-4. Steam decision point at Phase 11: add Facepunch + Steam transport behind the same bootstrap; Steam lobby/invites replace join-code UI when running under Steam.
+4. Steam decision point at Phase 11: add Facepunch + the community Steam transport behind the same bootstrap; Steam lobby/invites replace join-code UI when running under Steam. Relay/join-code path stays alive as the non-Steam fallback and the editor test path.
 
 ---
 
