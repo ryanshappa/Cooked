@@ -15,22 +15,19 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `GameInput` — `GameInput` component with `InputSystem_Actions` assigned
 - `HUD` — Canvas with `Crosshair` only (text prompts removed by design; `PlayerInteractUI.cs` kept on disk for break-room tutorial use)
 
-**Gameplay test objects (layer 6 = interactable):**
-- `ClearCounter`, `ClearCounter (1)` — BoxCollider + `ClearCounter`, child `counterTopPoint`
-- `Tomato` (KitchenObject + Rigidbody + SphereCollider), `Cheese` (KitchenObject + Rigidbody + BoxCollider)
+**Draft kitchen (Aug 2026)** — a ~13×8m perimeter rectangle, stations facing inward, walk-in entrance gap mid-south. All counters normalized to surface ≈ y 1.0.
 
-**Props:**
-- `Prop_Fridge_01` — **FridgeCounter** body + two independent **FridgeDoor**s; shelf stock: Cheese+Meat (right), Tomato (left), layer 6. ⚠️ Scene instances must come from `_Assets/Prefabs/Counters/` — identical-looking *Pandazole pack* prefab instances were silently in the scene (fridge AND table); pack prefabs get none of our components.
-- `KitchenTable` — two-slot placing surface (`Slot_L`/`Slot_R`, each a ClearCounter), replaces the old pack-prefab `Prop_KitchenTable_01` instance.
-- `TrashBin` — scriptless physical dumpster (open-top colliders) at (2.9, 0, -4.1); tossed items stay inside.
-- `PlatesCounter` — plate dispenser at (-1.5, 0, -2.8); display plate on top is the grab point.
-- `CuttingCounter` at (-3.2, 0, -2.8) — chopping board + knife visual; LMB chops.
-- `StoveCounter` at (-4.9, 0, -2.8) — stove + pan visual; auto-cooks meat (8s), burns if left (12s more).
-- `DeliveryCounter` at (-6.6, 0, -2.8) — plates-only delivery window.
-- All counters normalized to ClearCounter height (surface ≈ y 1.0; visuals at 0.8 scale).
-- `Bake` — pizza oven from the PizzA pack (future StoveCounter/oven)
-- `Prop_KitchenTable_01`, `Prop_TrayHolder`, `Prop_KitchenCabinet_01`, `Kitchen_tabla_01`
-- Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`
+| Edge | Contents (west→east / north→south) |
+|---|---|
+| North (z=2.6, rot 180) | pizza oven `Bake` (NW corner, mouth facing in) · Clear · Stove ×2 · Cutting ×2 · Plates · Clear |
+| West (x=−6.4, rot 90) | Clear · **Delivery** · Clear |
+| East (x=6.4, rot 270) | Clear · **Fridge** · Clear |
+| South (z=−4.6, rot 0) | Clear ×2 · KitchenTable · **entrance gap** · KitchenTable · Clear ×2 |
+| Inside | `TrashBin` at SE corner (5.3, −3.4); Player spawns center (0, −1); loose Tomato/Cheese on the two north Clear counters |
+
+Counter fronts face +z at rot 0 (handles/knobs side). ⚠️ Scene instances must come from `_Assets/Prefabs/Counters/` — identical-looking *Pandazole pack* prefab instances were silently in the scene once (fridge AND table); pack prefabs get none of our components. ⚠️ Editor-scripting note: `GameObject.Find` matches same-named *children* (Tomato/Bake/wall roots all have same-named kids) — always resolve scene roots via `scene.GetRootGameObjects()`.
+
+**Parked at +25/+25 (not deleted):** old test-scene deco — `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`, `Kitchen_tabla_01`.
 
 ## Layers
 - **3 `PlayerBody`** — (pre-existing, currently unused by scripts)

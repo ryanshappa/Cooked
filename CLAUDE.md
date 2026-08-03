@@ -67,6 +67,7 @@ Work through phases in order; items within a phase are sized to be one sitting e
 - [x] `StoveCounter` (bar version): auto-cooks via chained `CookingRecipeSO`s (Meat→Cooked Steak 8s → Burned Steak 12s); `GetCookProgress()` hook for UI/audio. **Recipe-existence = placement filter**: stations only accept items they have recipes for (vegetables can't go on the stove, meat can't go on the board, plates on neither). PizzA oven prop still to be wired as a second cook station later.
 - [x] `DeliveryCounter`: accepts only plates; despawns them ~0.6s after set-down. Order validation + payment land in Phase 3. All counters normalized to ClearCounter height (visual 0.8 scale, surface ≈ 1.0m).
 - [ ] Selected-counter/object highlight visual driven by the unified interaction system.
+- [x] Draft playtest kitchen: ~13×8m perimeter rectangle (cooking line north w/ oven, delivery west, fridge east, prep tables + entrance south, trash inside) — see `Docs/SceneSetup.md`.
 
 ## Phase 2 — Physics cooking minigames (the core twist)
 Design doc: `Docs/Minigames.md` (written — grading framework + per-minigame designs). This phase is the game's identity; give it the most iteration time.
