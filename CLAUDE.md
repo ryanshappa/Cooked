@@ -65,7 +65,7 @@ Work through phases in order; items within a phase are sized to be one sitting e
 - [x] `Plate` kitchen object v1: `PlateHolder` gives it one food slot when on a counter (place food onto the plate; pick food off it; carry the plate with food riding along). Multi-ingredient contents model + valid-ingredient rules come with recipes (Phase 3).
 - [x] `CuttingCounter` (bar version): LMB chops via `IWorkStation`; `CuttingRecipeSO` (Tomato→Chopped ×5, Cheese→Sliced ×4). Physics minigame replaces the click-mash in Phase 2.
 - [x] `StoveCounter` (bar version): auto-cooks via chained `CookingRecipeSO`s (Meat→Cooked Steak 8s → Burned Steak 12s); `GetCookProgress()` hook for UI/audio. **Recipe-existence = placement filter**: stations only accept items they have recipes for (vegetables can't go on the stove, meat can't go on the board, plates on neither). PizzA oven prop still to be wired as a second cook station later.
-- [ ] `DeliveryCounter`: accepts a plate, validates against current orders.
+- [x] `DeliveryCounter`: accepts only plates; despawns them ~0.6s after set-down. Order validation + payment land in Phase 3. All counters normalized to ClearCounter height (visual 0.8 scale, surface ≈ 1.0m).
 - [ ] Selected-counter/object highlight visual driven by the unified interaction system.
 
 ## Phase 2 — Physics cooking minigames (the core twist)

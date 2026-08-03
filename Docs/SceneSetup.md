@@ -26,6 +26,8 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `PlatesCounter` — plate dispenser at (-1.5, 0, -2.8); display plate on top is the grab point.
 - `CuttingCounter` at (-3.2, 0, -2.8) — chopping board + knife visual; LMB chops.
 - `StoveCounter` at (-4.9, 0, -2.8) — stove + pan visual; auto-cooks meat (8s), burns if left (12s more).
+- `DeliveryCounter` at (-6.6, 0, -2.8) — plates-only delivery window.
+- All counters normalized to ClearCounter height (surface ≈ y 1.0; visuals at 0.8 scale).
 - `Bake` — pizza oven from the PizzA pack (future StoveCounter/oven)
 - `Prop_KitchenTable_01`, `Prop_TrayHolder`, `Prop_KitchenCabinet_01`, `Kitchen_tabla_01`
 - Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`

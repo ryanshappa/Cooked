@@ -25,6 +25,9 @@ Station catalog (grows through Phase 1):
 | `PlatesCounter` | nothing (the display plate on top is the grab point) | **no** | grab the plate stack to receive a fresh `Plate` |
 | `CuttingCounter` | — (E places/picks up; **LMB chops** via `IWorkStation`) | only items with a **CuttingRecipeSO** | after `cutsRequired` chops the item becomes the recipe output; squash-scale placeholder feedback |
 | `StoveCounter` | — (cooking is automatic) | only items with a **CookingRecipeSO** | timer per occupant; chained recipes give Cooked→Burned; `GetCookProgress()` for future UI/audio |
+| `DeliveryCounter` | — | **plates only** (`PlateHolder` present — the inverse of the plate's own filter) | plate despawns ("delivered") ~0.6s after set down, food and all; Phase 3 adds order validation + payment here |
+
+**Sizing convention:** all counter prefabs match ClearCounter — visual child scaled **0.8**, collider ≈ (1.19, 1.01, 1.16), surface at y ≈ **1.0**. The Kitchen Chaos visuals are 1.26m tall at native scale, too tall for our player; scale the *visual child*, never the prefab root (root scale would shrink items parented onto the counter). TrashBin is the exception — root-scaled 0.8, safe because nothing ever parents to it.
 
 **Recipe-based acceptance (the "only certain items" rule):** `CanAcceptKitchenObject(KitchenObject incoming)` now takes the incoming item. A station accepts an item **iff it has a recipe for it** — no separate category tags needed. So vegetables can't go on the stove (no cooking recipe), meat can't go on the cutting board (no cutting recipe), and plates go on neither (no recipes at all). `PlateHolder` additionally refuses other plates. Recipes live in `ScriptableObjects/Recipes/`: `Cut_Tomato` (5 cuts), `Cut_Cheese` (4), `Cook_Meat` (8s), `Burn_CookedSteak` (12s more).
 
