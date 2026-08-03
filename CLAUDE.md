@@ -5,7 +5,7 @@
 **Yes Chef** is a 1–4 player co-op cooking game (Overcooked-like) built in **Unity 6** with four twists that define every design decision:
 
 1. **First-person perspective** — not top-down. Players see the kitchen through their chef's eyes.
-2. **Physics-based cooking minigames** — no "hold E to fill a bar." Players manually sear and flip steaks, chop vegetables for sides, brush on marinades and butter, and plate dishes with real physics interactions (inspiration: Schedule 1's hands-on tasks).
+2. **Simulator-style cooking** — no "hold E to fill a bar." Players manually sear and flip steaks, chop vegetables, brush on marinades, and plate dishes as dynamic physical chores with direct manipulation (inspiration: Schedule 1's station work, Cooking Simulator). Design: `Docs/Simulator.md`.
 3. **Proximity voice chat** — positional, distance-attenuated voice plus diegetic kitchen noise (timers beeping, oil sizzling) so communication is itself a gameplay challenge.
 4. **Randomized kitchen layouts** — the kitchen is procedurally arranged each match so players can't memorize routes.
 
@@ -69,16 +69,18 @@ Work through phases in order; items within a phase are sized to be one sitting e
 - [ ] Selected-counter/object highlight visual driven by the unified interaction system.
 - [x] Draft playtest kitchen: ~13×8m perimeter rectangle (cooking line north w/ oven, delivery west, fridge east, prep tables + entrance south, trash inside) — see `Docs/SceneSetup.md`.
 
-## Phase 2 — Physics cooking minigames (the core twist)
-Design doc: `Docs/Minigames.md` (written — grading framework + per-minigame designs). This phase is the game's identity; give it the most iteration time.
-- [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, stack alignment), weights/tiers in `PrepQualitySO` data; scores stamp the prepped component and roll up into order payout in Phase 3. See `Docs/Minigames.md`.
+## Phase 2 — The simulator system (the core twist)
+Design doc: `Docs/Simulator.md` (written — docked-view architecture, per-action designs, grading framework, Schedule 1 footage analysis). This phase is the game's identity; give it the most iteration time. Build order per the doc: docking → cursor drag → chopping v1 (go/no-go) → step prompts → brushing → plating.
+- [ ] **`WorkstationView` docking**: interact at a fine-work station → camera glides to a fixed bench view, movement locks, cursor frees; Esc/E undocks. (The Schedule 1 pattern.)
+- [ ] **Cursor physics-drag** in docked views: spring-joint grab/drag/release of rigidbodies + ghost-target snap zones.
+- [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, plating alignment), weights/tiers in `PrepQualitySO` data; scores stamp the prepped component and roll up into order payout in Phase 3. See `Docs/Simulator.md`.
 - [ ] **Held-tool system**: player can hold tools (knife, spatula, sauce ladle) with first-person animations; extend carry system to distinguish tools from ingredients.
 - [ ] **Chopping v1**: knife follows a constrained swing; ingredient starts as pre-cut chunks joined by breakable fixed joints (real mesh slicing later only if worth it). Cut quality = slice count/evenness.
 - [ ] **Sauce/marinade brushing v1**: surface with a coverage mask (steak marinade, garlic butter on bread); brush paints via raycast splat-map, success = % coverage.
 - [ ] **Plating/assembly v1**: physically arrange steak + sides on the plate; snap-with-tolerance so it's tactile but not rage-inducing; sloppiness affects order score.
 - [ ] **Pan/stove v1**: pan is a physics container, flip gesture for patties; food visibly changes state (raw→cooked→burned materials + smoke VFX hook).
-- [ ] Replace the CuttingCounter/StoveCounter bar interactions from Phase 1 with these minigames behind the same recipe SO data.
-- [ ] Playtest pass: tune each minigame to be learnable in <1 minute (they must be teachable in the break room later).
+- [ ] Replace the CuttingCounter/StoveCounter bar interactions from Phase 1 with simulator actions behind the same recipe SO data (cooking stays roaming/world-side by design — never docks).
+- [ ] Playtest pass: tune each action to be learnable in <1 minute (they must be teachable in the break room later).
 
 ## Phase 3 — Game loop (single-player complete)
 - [ ] `RecipeSO` (final dish = list of KitchenObjectSOs) + `RecipeListSO`.
@@ -97,7 +99,7 @@ Follow the Kitchen Chaos multiplayer course structure, adapted to first-person.
 - [ ] Player-player physicality: chefs get colliders and can bump each other; a hard bump knocks the held item out of the victim's hands (→ dirty/wasted food rule from Phase 3).
 - [ ] Convert KitchenObject to `NetworkObject`: spawn/despawn through server, NGO parenting instead of raw `transform.SetParent`; decide how the *physics drop* state replicates (server-sim transform sync is fine).
 - [ ] Convert all counters + OrderManager + GameManager to networked (server runs logic; clients get NetworkVariables/ClientRpcs for feedback).
-- [ ] Minigame networking: minigame runs on the interacting client, client reports result, server validates plausibility and applies outcome (keeps physics feel local; document per-minigame in `Docs/Minigames.md`).
+- [ ] Simulator networking: docked/roaming actions run on the interacting client, client reports metrics, server validates plausibility and applies outcome (keeps physics feel local; contract in `Docs/Simulator.md`).
 - [ ] UGS setup: project link, anonymous Authentication.
 - [ ] Lobby service: create/join (code + quick join), lobby list UI, heartbeat/poll.
 - [ ] Relay: allocate on host, join via code, wire into `UnityTransport`; keep all UGS bootstrap in one `MultiplayerBootstrap` class so a Steam transport can slot in later.

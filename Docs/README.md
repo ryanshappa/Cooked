@@ -22,7 +22,7 @@ Each system doc covers:
 - [InteractionSystem.md](InteractionSystem.md) — look-at raycasting, interact prompts, pickup/carry/drop
 - [KitchenObjectSystem.md](KitchenObjectSystem.md) — kitchen objects, parents/surfaces, `KitchenObjectSO` data
 - [SceneSetup.md](SceneSetup.md) — current test scene contents and wiring
-- [Minigames.md](Minigames.md) — physics cooking minigames + PrepScore grading framework (design doc; Phase 2 builds it)
+- [Simulator.md](Simulator.md) — the simulator system: docked station views, direct-manipulation cooking actions, PrepScore grading (design doc + Schedule 1 reference-footage analysis; Phase 2 builds it)
 - [Counters.md](Counters.md) — BaseCounter + station catalog (ClearCounter, ContainerCounter/fridge)
 
 ### Planned (create when the system is built)

@@ -39,3 +39,5 @@
 *.so binary
 
 # Git LFS deliberately not used yet — repo is small; revisit if clone size becomes a problem.
+*.mp4 binary
+*.mov binary
