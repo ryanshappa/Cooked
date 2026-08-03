@@ -5,11 +5,13 @@
 **Yes Chef** is a 1–4 player co-op cooking game (Overcooked-like) built in **Unity 6** with four twists that define every design decision:
 
 1. **First-person perspective** — not top-down. Players see the kitchen through their chef's eyes.
-2. **Physics-based cooking minigames** — no "hold E to fill a bar." Players manually chop lettuce, spread pizza sauce, flip patties, and assemble dishes with real physics interactions (inspiration: Schedule 1's hands-on tasks).
+2. **Physics-based cooking minigames** — no "hold E to fill a bar." Players manually sear and flip steaks, chop vegetables for sides, brush on marinades and butter, and plate dishes with real physics interactions (inspiration: Schedule 1's hands-on tasks).
 3. **Proximity voice chat** — positional, distance-attenuated voice plus diegetic kitchen noise (timers beeping, oil sizzling) so communication is itself a gameplay challenge.
 4. **Randomized kitchen layouts** — the kitchen is procedurally arranged each match so players can't memorize routes.
 
 Supporting features: a **physical lobby** (restaurant break room with practice stations, ready-up, host-starts-game), **order scaling** by player count, **money earned per completed order** spent on cosmetic accessories (aprons, hats), and multiple **modes** (Party vs-the-clock, Endless survival, VS team competition).
+
+**Setting: a steakhouse.** The restaurant serves steak dinners — steaks (the Meat ingredient), sides, plated meals. Recipes are TBD (designed in Phase 3/10); until then, steak-centric examples are the default when writing content or docs. Everything is physical — items, counters, and eventually the chefs themselves: colliding players will be able to knock held food out of each other's hands (dropped food becomes dirty/wasted).
 
 Reference material: Code Monkey's Kitchen Chaos free course + its multiplayer follow-up (https://unitycodemonkey.com/kitchenchaosmultiplayercourse.php). We borrow its architecture patterns (KitchenObject/IKitchenObjectParent, ScriptableObject recipes, NGO server-auth multiplayer) but adapt everything to first-person + physics.
 
@@ -71,8 +73,8 @@ Design doc: `Docs/Minigames.md` (written — grading framework + per-minigame de
 - [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, stack alignment), weights/tiers in `PrepQualitySO` data; scores stamp the prepped component and roll up into order payout in Phase 3. See `Docs/Minigames.md`.
 - [ ] **Held-tool system**: player can hold tools (knife, spatula, sauce ladle) with first-person animations; extend carry system to distinguish tools from ingredients.
 - [ ] **Chopping v1**: knife follows a constrained swing; ingredient starts as pre-cut chunks joined by breakable fixed joints (real mesh slicing later only if worth it). Cut quality = slice count/evenness.
-- [ ] **Sauce spreading v1**: pizza dough with a coverage mask; ladle/brush paints sauce (raycast splat-map), success = % coverage.
-- [ ] **Assembly v1**: physically stack burger/pizza components; snap-with-tolerance so it's tactile but not rage-inducing; sloppiness affects order score.
+- [ ] **Sauce/marinade brushing v1**: surface with a coverage mask (steak marinade, garlic butter on bread); brush paints via raycast splat-map, success = % coverage.
+- [ ] **Plating/assembly v1**: physically arrange steak + sides on the plate; snap-with-tolerance so it's tactile but not rage-inducing; sloppiness affects order score.
 - [ ] **Pan/stove v1**: pan is a physics container, flip gesture for patties; food visibly changes state (raw→cooked→burned materials + smoke VFX hook).
 - [ ] Replace the CuttingCounter/StoveCounter bar interactions from Phase 1 with these minigames behind the same recipe SO data.
 - [ ] Playtest pass: tune each minigame to be learnable in <1 minute (they must be teachable in the break room later).
@@ -83,6 +85,7 @@ Design doc: `Docs/Minigames.md` (written — grading framework + per-minigame de
 - [ ] Orders UI: ticket list with ingredients, per-order countdown, success/fail feedback.
 - [ ] `GameManager` state machine: WaitingToStart → Countdown → Playing → GameOver, match timer.
 - [ ] Scoring: per-order money reward, quality multiplier from minigame performance; run-summary screen.
+- [ ] Food integrity: items dropped on the floor (or knocked from hands) become **dirty/wasted** — visual change + worthless for orders; trash or keep as clutter.
 - [ ] Pause menu + options (sensitivity, volume) with `GameInput` map switching (Player ↔ UI).
 - [ ] First-person polish pass: interact prompts as world-space UI on stations, crosshair states.
 
@@ -90,6 +93,7 @@ Design doc: `Docs/Minigames.md` (written — grading framework + per-minigame de
 Follow the Kitchen Chaos multiplayer course structure, adapted to first-person.
 - [ ] Decide + document authority model: server-authoritative kitchen objects and counters, owner-authoritative player movement. `Docs/Multiplayer.md`.
 - [ ] Convert Player to `NetworkBehaviour`: ownership checks, spawn points, client network transform for movement, sync look direction for head/animation.
+- [ ] Player-player physicality: chefs get colliders and can bump each other; a hard bump knocks the held item out of the victim's hands (→ dirty/wasted food rule from Phase 3).
 - [ ] Convert KitchenObject to `NetworkObject`: spawn/despawn through server, NGO parenting instead of raw `transform.SetParent`; decide how the *physics drop* state replicates (server-sim transform sync is fine).
 - [ ] Convert all counters + OrderManager + GameManager to networked (server runs logic; clients get NetworkVariables/ClientRpcs for feedback).
 - [ ] Minigame networking: minigame runs on the interacting client, client reports result, server validates plausibility and applies outcome (keeps physics feel local; document per-minigame in `Docs/Minigames.md`).
@@ -141,7 +145,7 @@ Follow the Kitchen Chaos multiplayer course structure, adapted to first-person.
 - [ ] **FP carry hands (Peak-style)**: visible first-person hands holding carried items out front with both hands while moving (two-hand grip pose + subtle sway); IK the hands onto the physics-driven held item so they track its wobble.
 - [ ] Ingredient state variants (whole/sliced/cooked/burned) for every recipe ingredient — Blender MCP where packs fall short.
 - [ ] VFX: smoke, steam, sauce splat, order-complete confetti (cheap particle systems).
-- [ ] Full recipe content pass: pizza, burger, salad + 2–3 more dishes with all SOs, prefabs, minigame tuning.
+- [ ] Full recipe content pass (steakhouse menu): steak dinners (rare→well-done), sides (salad, mashed potatoes, mac & cheese — the Pandazole pack has these), + 2–3 more dishes with all SOs, prefabs, minigame tuning.
 
 ## Phase 11 — Polish & release
 - [ ] Menus: title, settings (audio/video/controls/sensitivity), mode select, lobby browser.
