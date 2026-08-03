@@ -73,8 +73,10 @@ public class KitchenObject : MonoBehaviour
         {
             if (newParent is PlayerCarry)
             {
-                // For player carrying, disable physics & collisions
-                if (cols != null) foreach (var c in cols) c.enabled = false;
+                // For player carrying, disable physics & collisions.
+                // Live query, not the cached array: a plate may carry stacked
+                // items whose colliders must switch off/on with it.
+                foreach (var c in GetComponentsInChildren<Collider>(true)) c.enabled = false;
                 if (rb)
                 {
                     if (!rb.isKinematic)
@@ -100,7 +102,7 @@ public class KitchenObject : MonoBehaviour
                     }
                     rb.isKinematic = true;
                 }
-                if (cols != null) foreach (var c in cols) c.enabled = true;
+                foreach (var c in GetComponentsInChildren<Collider>(true)) c.enabled = true;
 
                 var follow = newParent.GetKitchenObjectFollowTransform();
                 transform.SetParent(follow, worldPositionStays: false);
@@ -114,7 +116,7 @@ public class KitchenObject : MonoBehaviour
         {
             // released to world
             transform.SetParent(null);
-            if (cols != null) foreach (var c in cols) c.enabled = true;
+            foreach (var c in GetComponentsInChildren<Collider>(true)) c.enabled = true;
             if (rb)
             {
                 rb.isKinematic = false;
@@ -130,7 +132,7 @@ public class KitchenObject : MonoBehaviour
         parent = null;
 
         transform.SetParent(null);
-        if (cols != null) foreach (var c in cols) c.enabled = true;
+        foreach (var c in GetComponentsInChildren<Collider>(true)) c.enabled = true;
 
         if (rb)
         {

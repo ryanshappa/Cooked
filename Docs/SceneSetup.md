@@ -23,6 +23,7 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `Prop_Fridge_01` — **FridgeCounter** body + two independent **FridgeDoor**s; shelf stock: Cheese+Meat (right), Tomato (left), layer 6. ⚠️ Scene instances must come from `_Assets/Prefabs/Counters/` — identical-looking *Pandazole pack* prefab instances were silently in the scene (fridge AND table); pack prefabs get none of our components.
 - `KitchenTable` — two-slot placing surface (`Slot_L`/`Slot_R`, each a ClearCounter), replaces the old pack-prefab `Prop_KitchenTable_01` instance.
 - `TrashBin` — scriptless physical dumpster (open-top colliders) at (2.9, 0, -4.1); tossed items stay inside.
+- `PlatesCounter` — plate dispenser at (-1.5, 0, -2.8); display plate on top is the grab point.
 - `Bake` — pizza oven from the PizzA pack (future StoveCounter/oven)
 - `Prop_KitchenTable_01`, `Prop_TrayHolder`, `Prop_KitchenCabinet_01`, `Kitchen_tabla_01`
 - Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`

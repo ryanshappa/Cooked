@@ -74,7 +74,20 @@ public class PlayerInteract : MonoBehaviour
                         targetSurface = surface;
                         action = InteractAction.Place;
                     }
-                    // Occupied or non-accepting surface: no action — never toss into the counter face.
+                    else if (surface.HasKitchenObject())
+                    {
+                        // Occupied — but the occupant may itself be a holder (a plate
+                        // on a counter): place onto it.
+                        var occupant = surface.GetKitchenObject();
+                        var nested = occupant != null ? occupant.GetComponent<IKitchenObjectParent>() : null;
+                        if (nested != null && !nested.HasKitchenObject() && nested.CanAcceptKitchenObject()
+                            && occupant != carry.GetKitchenObject())
+                        {
+                            targetSurface = nested;
+                            action = InteractAction.Place;
+                        }
+                    }
+                    // Otherwise: no action — never toss into the counter face.
                     return;
                 }
             }
@@ -88,6 +101,16 @@ public class PlayerInteract : MonoBehaviour
             if (ko != null && ko.GetParent() is not PlayerCarry)
             {
                 targetKitchenObject = ko;
+                action = InteractAction.Pickup;
+                return;
+            }
+
+            // Hitting an occupied surface counts as aiming at its item (slot
+            // colliders can enclose the item and shadow it from the ray).
+            var surface2 = hit.collider.GetComponentInParent<IKitchenObjectParent>();
+            if (surface2 != null && !ReferenceEquals(surface2, carry) && surface2.HasKitchenObject())
+            {
+                targetKitchenObject = surface2.GetKitchenObject();
                 action = InteractAction.Pickup;
                 return;
             }
