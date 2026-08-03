@@ -10,7 +10,8 @@ All player input flows through Unity's Input System (`InputSystem_Actions.inputa
 ## How it works
 - `GameInput` is a scene singleton (`Instance`, `DontDestroyOnLoad`). On `Awake` it resolves the `Player` and `UI` action maps and caches actions: `Move`, `Look`, `Jump`, `Sprint`, `Interact` (Jump/Sprint/Interact are optional lookups).
 - `OnEnable` enables the asset with the `Player` map on and `UI` map off. `SetPlayerInputActive(bool)` / `SetUIInputActive(bool)` switch maps (this is how pause menus should take over input later).
-- Convenience readers: `ReadMove()`, `ReadLook()`, `IsInteractPressed()`, etc.
+- Convenience readers: `ReadMove()`, `ReadLook()`, `IsInteractPressed()`, `IsAttackPressed()`, etc.
+- Action roles: **Interact (E)** = pickup/place/use; **Attack (LMB)** = perform work at a station (`IWorkStation` — chopping now, physics minigames in Phase 2).
 - Cinemachine's `CinemachineInputAxisController` reads Look on its own (bound to the same asset), not through `GameInput`.
 
 ## Scene/Inspector wiring

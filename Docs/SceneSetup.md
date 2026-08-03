@@ -24,6 +24,8 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 - `KitchenTable` — two-slot placing surface (`Slot_L`/`Slot_R`, each a ClearCounter), replaces the old pack-prefab `Prop_KitchenTable_01` instance.
 - `TrashBin` — scriptless physical dumpster (open-top colliders) at (2.9, 0, -4.1); tossed items stay inside.
 - `PlatesCounter` — plate dispenser at (-1.5, 0, -2.8); display plate on top is the grab point.
+- `CuttingCounter` at (-3.2, 0, -2.8) — chopping board + knife visual; LMB chops.
+- `StoveCounter` at (-4.9, 0, -2.8) — stove + pan visual; auto-cooks meat (8s), burns if left (12s more).
 - `Bake` — pizza oven from the PizzA pack (future StoveCounter/oven)
 - `Prop_KitchenTable_01`, `Prop_TrayHolder`, `Prop_KitchenCabinet_01`, `Kitchen_tabla_01`
 - Environment shell: `Base_floor`, `Base_Wall_2`, `Base_Wal_1`, `Base_Pillar`

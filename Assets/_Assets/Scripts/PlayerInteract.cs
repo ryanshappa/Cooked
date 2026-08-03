@@ -25,6 +25,7 @@ public class PlayerInteract : MonoBehaviour
     private KitchenObject targetKitchenObject;
     private IKitchenObjectParent targetSurface;
     private IInteractable targetInteractable;
+    private IWorkStation targetWorkStation;
 
     void Awake()
     {
@@ -46,6 +47,9 @@ public class PlayerInteract : MonoBehaviour
             PerformAction();
             ResolveTarget(); // action changed world state; re-resolve so nothing reads a stale target this frame
         }
+
+        if (input.IsAttackPressed() && targetWorkStation != null)
+            targetWorkStation.Work(transform);
     }
 
     void ResolveTarget()
@@ -54,6 +58,7 @@ public class PlayerInteract : MonoBehaviour
         targetKitchenObject = null;
         targetSurface = null;
         targetInteractable = null;
+        targetWorkStation = null;
 
         // Precise ray first so the prompt matches the reticle exactly;
         // small spherecast as a forgiveness fallback for thin objects.
@@ -62,6 +67,9 @@ public class PlayerInteract : MonoBehaviour
                    || Physics.SphereCast(cameraTransform.position, assistRadius, cameraTransform.forward,
                           out hit, maxDistance, interactMask, QueryTriggerInteraction.Collide);
 
+        if (hasHit)
+            targetWorkStation = hit.collider.GetComponentInParent<IWorkStation>();
+
         if (carry.HasKitchenObject())
         {
             if (hasHit)
@@ -69,7 +77,8 @@ public class PlayerInteract : MonoBehaviour
                 var surface = hit.collider.GetComponentInParent<IKitchenObjectParent>();
                 if (surface != null && !ReferenceEquals(surface, carry))
                 {
-                    if (!surface.HasKitchenObject() && surface.CanAcceptKitchenObject())
+                    var held = carry.GetKitchenObject();
+                    if (!surface.HasKitchenObject() && surface.CanAcceptKitchenObject(held))
                     {
                         targetSurface = surface;
                         action = InteractAction.Place;
@@ -80,8 +89,8 @@ public class PlayerInteract : MonoBehaviour
                         // on a counter): place onto it.
                         var occupant = surface.GetKitchenObject();
                         var nested = occupant != null ? occupant.GetComponent<IKitchenObjectParent>() : null;
-                        if (nested != null && !nested.HasKitchenObject() && nested.CanAcceptKitchenObject()
-                            && occupant != carry.GetKitchenObject())
+                        if (nested != null && !nested.HasKitchenObject() && nested.CanAcceptKitchenObject(held)
+                            && occupant != held)
                         {
                             targetSurface = nested;
                             action = InteractAction.Place;

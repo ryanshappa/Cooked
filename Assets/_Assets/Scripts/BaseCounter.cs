@@ -20,5 +20,5 @@ public abstract class BaseCounter : MonoBehaviour, IKitchenObjectParent, IIntera
     public KitchenObject GetKitchenObject() => kitchenObject;
     public void ClearKitchenObject() => kitchenObject = null;
     public bool HasKitchenObject() => kitchenObject != null;
-    public virtual bool CanAcceptKitchenObject() => counterTopPoint != null;
+    public virtual bool CanAcceptKitchenObject(KitchenObject incoming) => counterTopPoint != null;
 }

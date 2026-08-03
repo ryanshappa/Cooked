@@ -22,5 +22,5 @@ public class ContainerCounter : BaseCounter
     public override string GetInteractText() =>
         kitchenObjectSO != null ? $"Take {kitchenObjectSO.objectName}" : "Take";
 
-    public override bool CanAcceptKitchenObject() => false;
+    public override bool CanAcceptKitchenObject(KitchenObject incoming) => false;
 }

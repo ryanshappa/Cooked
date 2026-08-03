@@ -63,8 +63,8 @@ Work through phases in order; items within a phase are sized to be one sitting e
 - [x] Trash: `TrashBin` — scriptless physical dumpster (open-top colliders); tossed items pile up and stay (Schedule 1-style) instead of despawning. Revisit despawn at Phase 3 if piles become a problem.
 - [x] `PlatesCounter`: display-plate grab point dispenses plates (fridge-style grab, no timed spawning for now).
 - [x] `Plate` kitchen object v1: `PlateHolder` gives it one food slot when on a counter (place food onto the plate; pick food off it; carry the plate with food riding along). Multi-ingredient contents model + valid-ingredient rules come with recipes (Phase 3).
-- [ ] `CuttingCounter` (bar version first): place ingredient, interact to progress cut, `CuttingRecipeSO` (input → sliced output). Physics minigame replaces the bar in Phase 2.
-- [ ] `StoveCounter`/oven (bar version first): state machine idle→cooking→cooked→burned via `CookingRecipeSO`; wire the PizzA oven prop; sizzle/warning hooks for later audio.
+- [x] `CuttingCounter` (bar version): LMB chops via `IWorkStation`; `CuttingRecipeSO` (Tomato→Chopped ×5, Cheese→Sliced ×4). Physics minigame replaces the click-mash in Phase 2.
+- [x] `StoveCounter` (bar version): auto-cooks via chained `CookingRecipeSO`s (Meat→Cooked Steak 8s → Burned Steak 12s); `GetCookProgress()` hook for UI/audio. **Recipe-existence = placement filter**: stations only accept items they have recipes for (vegetables can't go on the stove, meat can't go on the board, plates on neither). PizzA oven prop still to be wired as a second cook station later.
 - [ ] `DeliveryCounter`: accepts a plate, validates against current orders.
 - [ ] Selected-counter/object highlight visual driven by the unified interaction system.
 

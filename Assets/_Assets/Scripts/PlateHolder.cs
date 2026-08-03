@@ -15,5 +15,7 @@ public class PlateHolder : MonoBehaviour, IKitchenObjectParent
     public KitchenObject GetKitchenObject() => held;
     public void ClearKitchenObject() => held = null;
     public bool HasKitchenObject() => held != null;
-    public bool CanAcceptKitchenObject() => plateTopPoint != null;
+    // Food only — never another plate.
+    public bool CanAcceptKitchenObject(KitchenObject incoming) =>
+        plateTopPoint != null && (incoming == null || incoming.GetComponent<PlateHolder>() == null);
 }

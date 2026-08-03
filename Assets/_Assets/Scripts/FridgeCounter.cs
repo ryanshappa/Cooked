@@ -5,5 +5,5 @@ using UnityEngine;
 /// Clicking the body itself does nothing.
 public class FridgeCounter : BaseCounter
 {
-    public override bool CanAcceptKitchenObject() => false;
+    public override bool CanAcceptKitchenObject(KitchenObject incoming) => false;
 }

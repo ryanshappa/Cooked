@@ -8,7 +8,9 @@ public interface IKitchenObjectParent
     public void ClearKitchenObject();
     public bool HasKitchenObject();
 
-    // Whether the player may place a held object here (a fridge says no;
-    // an occupied slot is checked separately via HasKitchenObject).
-    public bool CanAcceptKitchenObject();
+    // Whether the player may place this specific object here (a fridge says
+    // no to everything; a cutting board only accepts items it has a recipe
+    // for; a plate refuses other plates). Occupancy is checked separately
+    // via HasKitchenObject.
+    public bool CanAcceptKitchenObject(KitchenObject incoming);
 }

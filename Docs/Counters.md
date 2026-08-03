@@ -23,6 +23,12 @@ Station catalog (grows through Phase 1):
 | `ContainerCounter` | spawns its `kitchenObjectSO` into the player's hands | **no** | generic instant dispenser — currently unused (kept for crates/simple sources); `OnPlayerGrabbedObject` event |
 | `FridgeCounter` (fridge body) | nothing (doors handle interaction) | **no** | body is just a blocker/anchor for the doors + stock |
 | `PlatesCounter` | nothing (the display plate on top is the grab point) | **no** | grab the plate stack to receive a fresh `Plate` |
+| `CuttingCounter` | — (E places/picks up; **LMB chops** via `IWorkStation`) | only items with a **CuttingRecipeSO** | after `cutsRequired` chops the item becomes the recipe output; squash-scale placeholder feedback |
+| `StoveCounter` | — (cooking is automatic) | only items with a **CookingRecipeSO** | timer per occupant; chained recipes give Cooked→Burned; `GetCookProgress()` for future UI/audio |
+
+**Recipe-based acceptance (the "only certain items" rule):** `CanAcceptKitchenObject(KitchenObject incoming)` now takes the incoming item. A station accepts an item **iff it has a recipe for it** — no separate category tags needed. So vegetables can't go on the stove (no cooking recipe), meat can't go on the cutting board (no cutting recipe), and plates go on neither (no recipes at all). `PlateHolder` additionally refuses other plates. Recipes live in `ScriptableObjects/Recipes/`: `Cut_Tomato` (5 cuts), `Cut_Cheese` (4), `Cook_Meat` (8s), `Burn_CookedSteak` (12s more).
+
+**Work input (`IWorkStation`):** the Attack action (LMB) is the "do work at a station" input, resolved from the same aim ray as everything else. Today it's chop-on-click; in Phase 2 the physics minigames take over this input. E remains strictly pickup/place.
 | `FridgeDoor` (per door) | toggles that door (eased hinge swing; right +100°, left −100°) | n/a | to close, click the open door again — its collider swings with it |
 
 **`IngredientGrabPoint`** (`IngredientGrabPoint.cs`): a display prop on a fridge shelf. Use with empty hands → `KitchenObject.Spawn` of its SO into your grip; the prop never depletes (it's "stock"). Gated on its compartment's `door.IsOpen` (the closed door's collider also physically blocks the ray). Current stock — right compartment: 2× Cheese (top shelf), 2× Meat (raw steak, shelf below); left compartment: 2× Tomato (top shelf).

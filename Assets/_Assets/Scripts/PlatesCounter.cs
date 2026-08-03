@@ -4,5 +4,5 @@ using UnityEngine;
 /// that hands out Plate kitchen objects. Not a placement surface.
 public class PlatesCounter : BaseCounter
 {
-    public override bool CanAcceptKitchenObject() => false;
+    public override bool CanAcceptKitchenObject(KitchenObject incoming) => false;
 }

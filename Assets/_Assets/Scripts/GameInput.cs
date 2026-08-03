@@ -16,6 +16,7 @@ public class GameInput : MonoBehaviour
     public InputAction Jump { get; private set; }
     public InputAction Sprint { get; private set; }
     public InputAction Interact { get; private set; }
+    public InputAction Attack { get; private set; }
 
     // simple "service" access (optional)
     public static GameInput Instance { get; private set; }
@@ -43,6 +44,7 @@ public class GameInput : MonoBehaviour
         Jump = playerMap.FindAction("Jump", false);
         Sprint = playerMap.FindAction("Sprint", false);
         Interact = playerMap.FindAction("Interact", false);
+        Attack = playerMap.FindAction("Attack", false);
     }
 
     void OnEnable()
@@ -83,4 +85,5 @@ public class GameInput : MonoBehaviour
     public bool IsJumpHeld() => Jump?.IsPressed() ?? false;
     public bool IsSprintHeld() => Sprint?.IsPressed() ?? false;
     public bool IsInteractPressed() => Interact?.WasPressedThisFrame() ?? false;
+    public bool IsAttackPressed() => Attack?.WasPressedThisFrame() ?? false;
 }
