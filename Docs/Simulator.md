@@ -124,6 +124,7 @@ Docked simulation runs locally on the acting client → `{actionType, targetId, 
 - [x] Docked vs FP chopping — **decided: FP hover-tool** (the CookingSim footage settled it; docking shelved as a plating-only fallback).
 - [x] Cooking Simulator reference footage — captured + analyzed above.
 - [ ] Hover-tool feel details: does the knife *visibly* leave the hand to hover, or do the FP arms reach with it? (Prototype with a floating knife first; arms come with the Phase 10 rig.)
+- **Decided: vertical slices only** (no CookingSim horizontal cuts) — knife is blade-down always. `Tool` has hover + held rotation offsets; held pose angles the blade across the view so the thin mesh isn't edge-on invisible.
 - [ ] Pan-flip gesture spec (mouse flick vs timed click) — after chopping ships.
 - [ ] Multi-grab — v2 QoL for plating several garnishes.
 - [ ] `PrepQualitySO` authoring format — define when chopping v1 lands.

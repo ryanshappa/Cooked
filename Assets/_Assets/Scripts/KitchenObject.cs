@@ -7,12 +7,14 @@ public class KitchenObject : MonoBehaviour
     private IKitchenObjectParent parent;
     private Rigidbody rb;
     private Collider[] cols;
+    private Tool tool;
     private Vector3 localCenter;   // combined collider center in root-local space
 
     void Awake()
     {
         rb   = GetComponent<Rigidbody>();
         cols = GetComponentsInChildren<Collider>();
+        tool = GetComponent<Tool>();
 
         // Cache the collider-bounds center so a held item centers its BODY on the
         // hold point, not its pivot (pivots on these models are often offset).
@@ -47,14 +49,18 @@ public class KitchenObject : MonoBehaviour
 
     void Update()
     {
-        // Held: glued to the hold point every frame (zero lag), centered on the reticle.
+        // Held: glued to the hold point every frame (zero lag), centered on the
+        // reticle. Tools add their held-pose rotation offset (a knife angled
+        // across the view instead of edge-on).
         if (parent is PlayerCarry playerCarry)
         {
             var follow = playerCarry.GetKitchenObjectFollowTransform();
             if (follow != null)
             {
-                transform.rotation = follow.rotation;
-                transform.position = follow.position - follow.rotation * Vector3.Scale(localCenter, transform.lossyScale);
+                Quaternion rot = follow.rotation;
+                if (tool != null) rot *= tool.HeldRotationOffset;
+                transform.rotation = rot;
+                transform.position = follow.position - rot * Vector3.Scale(localCenter, transform.lossyScale);
             }
         }
     }

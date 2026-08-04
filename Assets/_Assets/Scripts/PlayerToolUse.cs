@@ -98,8 +98,12 @@ public class PlayerToolUse : MonoBehaviour
         cutPointWorld = center + axis * along + Vector3.up * (b.extents.y + 0.01f);
 
         // Blade runs along the cut line (counter's forward), offset per-model.
+        // The carry glue multiplies in the tool's HELD offset; cancel it here
+        // so the hover pose is exactly the hover offset.
         var toolComp = held.GetComponent<Tool>();
-        hoverRot = Quaternion.LookRotation(counter.transform.forward, Vector3.up) * toolComp.HoverRotationOffset;
+        hoverRot = Quaternion.LookRotation(counter.transform.forward, Vector3.up)
+                   * toolComp.HoverRotationOffset
+                   * Quaternion.Inverse(toolComp.HeldRotationOffset);
 
         // Guide line across the ingredient at the cut plane
         Vector3 lineDir = counter.transform.forward;

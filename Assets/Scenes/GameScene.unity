@@ -2714,7 +2714,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  playerRadius: 0.7
+  playerRadius: 0.3
   playerHeight: 2
   collisionLayers:
     serializedVersion: 2

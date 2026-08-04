@@ -146,7 +146,8 @@ Follow the Kitchen Chaos multiplayer course structure, adapted to first-person.
 
 ## Phase 10 — Art, animation & content pipeline
 - [ ] Audit Pandazole + PizzA packs: which stations/ingredients are covered, gap list for custom assets → `Docs/ArtDirection.md`.
-- [ ] Lock a look (low-poly stylized matches the packs): palette + one URP post volume profile.
+- [ ] Lock a look: **target = Schedule 1's clean stylized aesthetic as the base, with selected Cooking Simulator realism elements** (dev's stated taste, Aug 2026) — not full low-poly cartoon, not full realism. Palette + one URP post volume profile.
+- [ ] Food scale rule: sizes anchored to the steak (0.315m) — slightly-larger-than-real reads best; proportions kept sensible (steak > cheese block > tomato).
 - [ ] Chef character: simple rigged low-poly chef (pack or Blender via MCP); needs head-look + carry + minigame gesture animations. Decide full-body-with-camera-clipping vs separate FP arms, and doc it.
 - [ ] **FP carry hands (Peak-style)**: visible first-person hands holding carried items out front with both hands while moving (two-hand grip pose + subtle sway); IK the hands onto the physics-driven held item so they track its wobble.
 - [ ] Ingredient state variants (whole/sliced/cooked/burned) for every recipe ingredient — Blender MCP where packs fall short.

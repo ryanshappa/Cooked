@@ -110,7 +110,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tool
   type: 0
-  hoverRotationEuler: {x: 0, y: 0, z: 0}
+  hoverRotationEuler: {x: 0, y: 0, z: 90}
+  heldRotationEuler: {x: 0, y: -45, z: 90}
 --- !u!1 &7323401352387633879
 GameObject:
   m_ObjectHideFlags: 0
