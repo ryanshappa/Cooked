@@ -36,7 +36,7 @@ public class PlayerToolUse : MonoBehaviour
 
         var guideGo = new GameObject("CutGuide");
         guide = guideGo.AddComponent<LineRenderer>();
-        guide.positionCount = 4;   // staple over the item: marks a VERTICAL cut plane
+        guide.positionCount = 2;   // single red line across the item at the cut plane
         guide.startWidth = guide.endWidth = 0.008f;
         guide.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
         guide.material.color = new Color(1f, 0.25f, 0.2f, 0.9f);
@@ -126,18 +126,11 @@ public class PlayerToolUse : MonoBehaviour
         var toolComp = held.GetComponent<Tool>();
         hoverRot = Quaternion.LookRotation(lineDir, Vector3.up) * toolComp.HoverRotationOffset;
 
-        // Guide: a staple wrapping over the item — down both sides — so the
-        // VERTICAL cut plane reads clearly.
+        // Guide: single red line across the item at the cut plane.
         float halfDepth = Mathf.Abs(Vector3.Dot(b.extents, lineDir)) + 0.015f;
-        float topY = b.max.y + 0.006f;
-        float botY = b.min.y + 0.002f;
-        Vector3 pTop = center + axis * along; pTop.y = topY;
-        Vector3 nearTop = pTop - lineDir * halfDepth;
-        Vector3 farTop  = pTop + lineDir * halfDepth;
-        guide.SetPosition(0, new Vector3(nearTop.x, botY, nearTop.z));
-        guide.SetPosition(1, nearTop);
-        guide.SetPosition(2, farTop);
-        guide.SetPosition(3, new Vector3(farTop.x, botY, farTop.z));
+        Vector3 pTop = center + axis * along; pTop.y = b.max.y + 0.006f;
+        guide.SetPosition(0, pTop - lineDir * halfDepth);
+        guide.SetPosition(1, pTop + lineDir * halfDepth);
         guide.enabled = true;
         return true;
     }
