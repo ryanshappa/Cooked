@@ -87,8 +87,13 @@ public class PlayerToolUse : MonoBehaviour
         var b = rends[0].bounds;
         foreach (var r in rends) b.Encapsulate(r.bounds);
 
-        // Cut axis = the counter's local X; aim slides the cut plane along it.
-        Vector3 axis = counter.transform.right;
+        // View-relative cutting: the cut plane slides along your flattened look
+        // direction (look up/down = nearer/farther cut), and the cut line runs
+        // left-right across your view. No mode switch — leaning in IS the focus.
+        Vector3 axis = cameraTransform.forward; axis.y = 0f; axis.Normalize();
+        Vector3 lineDir = cameraTransform.right; lineDir.y = 0f; lineDir.Normalize();
+        if (axis.sqrMagnitude < 0.001f || lineDir.sqrMagnitude < 0.001f) return false;
+
         Vector3 center = b.center;
         float halfLen = Mathf.Abs(Vector3.Dot(b.extents, axis));
         float along = Mathf.Clamp(Vector3.Dot(hit.point - center, axis), -halfLen, halfLen);
@@ -97,16 +102,14 @@ public class PlayerToolUse : MonoBehaviour
         cutT = halfLen > 0.0001f ? (along + halfLen) / (2f * halfLen) : 0.5f;
         cutPointWorld = center + axis * along + Vector3.up * (b.extents.y + 0.01f);
 
-        // Blade runs along the cut line (counter's forward), offset per-model.
-        // The carry glue multiplies in the tool's HELD offset; cancel it here
-        // so the hover pose is exactly the hover offset.
+        // Blade lies along the cut line, blade down. The carry glue multiplies
+        // in the tool's HELD offset; cancel it so the hover pose is exact.
         var toolComp = held.GetComponent<Tool>();
-        hoverRot = Quaternion.LookRotation(counter.transform.forward, Vector3.up)
+        hoverRot = Quaternion.LookRotation(lineDir, Vector3.up)
                    * toolComp.HoverRotationOffset
                    * Quaternion.Inverse(toolComp.HeldRotationOffset);
 
         // Guide line across the ingredient at the cut plane
-        Vector3 lineDir = counter.transform.forward;
         float halfDepth = Mathf.Abs(Vector3.Dot(b.extents, lineDir)) + 0.02f;
         Vector3 p = center + axis * along + Vector3.up * (b.extents.y + 0.005f);
         guide.SetPosition(0, p - lineDir * halfDepth);
