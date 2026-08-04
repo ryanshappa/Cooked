@@ -2770,7 +2770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerToolUse
   input: {fileID: 1039790102}
   cameraTransform: {fileID: 0}
-  maxDistance: 2.5
+  maxDistance: 1.4
   interactMask:
     serializedVersion: 2
     m_Bits: 64

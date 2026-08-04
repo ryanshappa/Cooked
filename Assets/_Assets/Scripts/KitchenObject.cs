@@ -50,17 +50,15 @@ public class KitchenObject : MonoBehaviour
     void Update()
     {
         // Held: glued to the hold point every frame (zero lag), centered on the
-        // reticle. Tools add their held-pose rotation offset (a knife angled
-        // across the view instead of edge-on).
+        // reticle. All rotation policy (tool poses, hover override) lives in
+        // PlayerCarry's hold point — the glue just follows it.
         if (parent is PlayerCarry playerCarry)
         {
             var follow = playerCarry.GetKitchenObjectFollowTransform();
             if (follow != null)
             {
-                Quaternion rot = follow.rotation;
-                if (tool != null) rot *= tool.HeldRotationOffset;
-                transform.rotation = rot;
-                transform.position = follow.position - rot * Vector3.Scale(localCenter, transform.lossyScale);
+                transform.rotation = follow.rotation;
+                transform.position = follow.position - follow.rotation * Vector3.Scale(localCenter, transform.lossyScale);
             }
         }
     }

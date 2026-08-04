@@ -12,7 +12,7 @@ public class PlayerToolUse : MonoBehaviour
     [SerializeField] private Transform cameraTransform;   // falls back to Camera.main
 
     [Header("Targeting")]
-    [SerializeField] private float maxDistance = 2.5f;
+    [SerializeField] private float maxDistance = 1.4f;   // hover only engages up close — leaning in IS the focus mode
     [SerializeField] private LayerMask interactMask;
 
     [Header("Hover pose")]
@@ -36,7 +36,7 @@ public class PlayerToolUse : MonoBehaviour
 
         var guideGo = new GameObject("CutGuide");
         guide = guideGo.AddComponent<LineRenderer>();
-        guide.positionCount = 2;
+        guide.positionCount = 4;   // staple over the item: marks a VERTICAL cut plane
         guide.startWidth = guide.endWidth = 0.008f;
         guide.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
         guide.material.color = new Color(1f, 0.25f, 0.2f, 0.9f);
@@ -96,24 +96,48 @@ public class PlayerToolUse : MonoBehaviour
 
         Vector3 center = b.center;
         float halfLen = Mathf.Abs(Vector3.Dot(b.extents, axis));
-        float along = Mathf.Clamp(Vector3.Dot(hit.point - center, axis), -halfLen, halfLen);
+
+        // Don't trust the raw collider hit for the cut position — intersect the
+        // view ray with the horizontal plane at the ITEM'S TOP and clamp to the
+        // item's bounds. Pitch sweeps the cut smoothly from the item's front
+        // edge to its back edge and can never leave the item.
+        float planeY = b.max.y;
+        Vector3 camPos = cameraTransform.position;
+        Vector3 camDir = cameraTransform.forward;
+        Vector3 aimPoint;
+        if (camDir.y < -0.0001f)
+        {
+            float tPlane = (planeY - camPos.y) / camDir.y;
+            aimPoint = camPos + camDir * tPlane;
+        }
+        else
+        {
+            aimPoint = center + axis * halfLen;   // looking level/up: back edge
+        }
+        float along = Mathf.Clamp(Vector3.Dot(aimPoint - center, axis), -halfLen, halfLen);
 
         targetCounter = counter;
         cutT = halfLen > 0.0001f ? (along + halfLen) / (2f * halfLen) : 0.5f;
         cutPointWorld = center + axis * along + Vector3.up * (b.extents.y + 0.01f);
 
-        // Blade lies along the cut line, blade down. The carry glue multiplies
-        // in the tool's HELD offset; cancel it so the hover pose is exact.
+        // Blade lies along the cut line, blade down. Hover rotation is applied
+        // verbatim by the hold point (no compensation needed — the glue follows
+        // the hold point directly).
         var toolComp = held.GetComponent<Tool>();
-        hoverRot = Quaternion.LookRotation(lineDir, Vector3.up)
-                   * toolComp.HoverRotationOffset
-                   * Quaternion.Inverse(toolComp.HeldRotationOffset);
+        hoverRot = Quaternion.LookRotation(lineDir, Vector3.up) * toolComp.HoverRotationOffset;
 
-        // Guide line across the ingredient at the cut plane
-        float halfDepth = Mathf.Abs(Vector3.Dot(b.extents, lineDir)) + 0.02f;
-        Vector3 p = center + axis * along + Vector3.up * (b.extents.y + 0.005f);
-        guide.SetPosition(0, p - lineDir * halfDepth);
-        guide.SetPosition(1, p + lineDir * halfDepth);
+        // Guide: a staple wrapping over the item — down both sides — so the
+        // VERTICAL cut plane reads clearly.
+        float halfDepth = Mathf.Abs(Vector3.Dot(b.extents, lineDir)) + 0.015f;
+        float topY = b.max.y + 0.006f;
+        float botY = b.min.y + 0.002f;
+        Vector3 pTop = center + axis * along; pTop.y = topY;
+        Vector3 nearTop = pTop - lineDir * halfDepth;
+        Vector3 farTop  = pTop + lineDir * halfDepth;
+        guide.SetPosition(0, new Vector3(nearTop.x, botY, nearTop.z));
+        guide.SetPosition(1, nearTop);
+        guide.SetPosition(2, farTop);
+        guide.SetPosition(3, new Vector3(farTop.x, botY, farTop.z));
         guide.enabled = true;
         return true;
     }

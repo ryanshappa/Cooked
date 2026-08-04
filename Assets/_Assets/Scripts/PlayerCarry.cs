@@ -43,9 +43,18 @@ public class PlayerCarry : MonoBehaviour, IKitchenObjectParent
         }
         else
         {
-            // Zero-lag carry (the shipped feel — don't smooth this)
+            // Zero-lag carry (the shipped feel — don't smooth this).
             dynamicHoldPoint.position = cameraTransform.position + cameraTransform.TransformDirection(holdOffset);
-            dynamicHoldPoint.rotation = cameraTransform.rotation;
+
+            // Tools stay LEVEL (yaw-only): a knife keeps its blade down and
+            // horizontal no matter how far you pitch the camera. Everything
+            // else glues to the full camera rotation as before.
+            var heldTool = held != null ? held.GetComponent<Tool>() : null;
+            if (heldTool != null)
+                dynamicHoldPoint.rotation =
+                    Quaternion.Euler(0f, cameraTransform.eulerAngles.y, 0f) * heldTool.HeldRotationOffset;
+            else
+                dynamicHoldPoint.rotation = cameraTransform.rotation;
         }
     }
 
