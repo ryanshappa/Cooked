@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[DefaultExecutionOrder(-40)]   // after PlayerToolUse (-50), before the KitchenObject glue (0)
 public class PlayerCarry : MonoBehaviour, IKitchenObjectParent
 {
     [SerializeField] private Transform cameraTransform; // Assign your camera transform
@@ -31,7 +32,7 @@ public class PlayerCarry : MonoBehaviour, IKitchenObjectParent
 
     public void ClearHoldOverride() => hasHoldOverride = false;
 
-    void Update()
+    void LateUpdate()
     {
         if (dynamicHoldPoint == null || cameraTransform == null) return;
 

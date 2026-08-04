@@ -47,11 +47,13 @@ public class KitchenObject : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void Update()
+    void LateUpdate()
     {
         // Held: glued to the hold point every frame (zero lag), centered on the
         // reticle. All rotation policy (tool poses, hover override) lives in
-        // PlayerCarry's hold point — the glue just follows it.
+        // PlayerCarry's hold point — the glue just follows it. LateUpdate,
+        // after PlayerToolUse/PlayerCarry (execution order), so the chain is
+        // jitter-free.
         if (parent is PlayerCarry playerCarry)
         {
             var follow = playerCarry.GetKitchenObjectFollowTransform();

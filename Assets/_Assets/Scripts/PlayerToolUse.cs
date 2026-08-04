@@ -5,6 +5,10 @@ using UnityEngine;
 /// a choppable item, the knife glides out to hover over the aim point with a
 /// projected cut-guide line; LMB chops at that position (CookingSim-style —
 /// your look direction is the cursor).
+/// Runs in LateUpdate before PlayerCarry and the KitchenObject glue
+/// (execution order) so the whole aim→hold→item chain updates in one frame —
+/// out-of-order updates made the hovering knife jitter while strafing.
+[DefaultExecutionOrder(-50)]
 public class PlayerToolUse : MonoBehaviour
 {
     [Header("Refs")]
@@ -43,7 +47,7 @@ public class PlayerToolUse : MonoBehaviour
         guide.enabled = false;
     }
 
-    void Update()
+    void LateUpdate()
     {
         if (!cameraTransform)
         {
@@ -127,11 +131,16 @@ public class PlayerToolUse : MonoBehaviour
         var toolComp = held.GetComponent<Tool>();
         hoverRot = Quaternion.LookRotation(lineDir, Vector3.up) * toolComp.HoverRotationOffset;
 
-        // Guide: single red line across the item at the cut plane.
-        float halfDepth = Mathf.Abs(Vector3.Dot(b.extents, lineDir)) + 0.015f;
+        // Guide: single red line matching the KNIFE's footprint (its blade
+        // track), so line and blade visually agree instead of the line only
+        // spanning the item's depth.
+        var heldRend = held.GetComponentInChildren<Renderer>();
+        float halfKnife = heldRend != null
+            ? Mathf.Max(0.1f, Mathf.Abs(Vector3.Dot(heldRend.bounds.extents, lineDir)))
+            : 0.18f;
         Vector3 pTop = center + axis * along; pTop.y = b.max.y + 0.006f;
-        guide.SetPosition(0, pTop - lineDir * halfDepth);
-        guide.SetPosition(1, pTop + lineDir * halfDepth);
+        guide.SetPosition(0, pTop - lineDir * halfKnife);
+        guide.SetPosition(1, pTop + lineDir * halfKnife);
         guide.enabled = true;
         return true;
     }
