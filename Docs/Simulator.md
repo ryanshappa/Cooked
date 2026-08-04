@@ -27,16 +27,40 @@ Yes Chef's identity pillar: cooking actions are hands-on physical tasks — chop
 5. **Batch rhythm** — tray of N items → repeat the small motion N times → satisfying completion beat (hopper swallow / PACK).
 6. **Sub-element chores** — one big thing made of many small targets (the plant's buds ≈ our pizza's topping spots, a rack of ribs, a tray of veg).
 
-## The two interaction tiers (proposed architecture)
+## Reference footage — Cooking Simulator trailer (`Docs/Videos/CookingSim/`)
+`cookingSim.mp4` + frame grids (`CookingSim_grid_01..04.jpg`, 2 fps). Observed sequence: produce rack → tomato carried to board → **knife slicing fully in first person** → blender → pouring liquids between vessels → grilling meat → sauce funneled into cups → potato chopped into chips that scatter across the counter → oven baking → then escalating chaos: prep table swept clear, cardboard boxes ignite, a **flaming gas canister gets carried through the wrecked kitchen**, fire spreads across the floor.
 
-| Tier | Where | Camera | Input | Used for |
-|---|---|---|---|---|
-| **Coarse (roaming)** | anywhere in kitchen | normal FP | E pickup/place, LMB work | carrying, placing, tossing, stove flips, oven loading — everything built so far |
-| **Fine (docked)** | at a `WorkstationView` station | camera glides to fixed bench view; movement locked, cursor freed | cursor drag/click on physical items; Esc/E to undock | chopping precision, sauce/marinade brushing, plating/assembly, packaging-style batch work |
+### What Cooking Simulator proves (and we adopt)
+1. **No docked views at all** — every action, including knife work, happens in roaming first person: the knife hovers where you aim, a click executes a cut where it hovers, slices are real rigidbodies that fall and scatter. Precision comes from generous *tolerances*, not from a special camera mode.
+2. **Liquids as gameplay** — pots/jugs/cups have fill levels; tipping a vessel produces a pour stream that fills whatever is under it. Simplified sim (float fill + stream + trigger), massive immersion payoff. Our steakhouse needs this for sauces/marinades anyway.
+3. **Appliances are physical containers** — oven with a door and tray, blender with a lid, each highlighted (outline) when focused. Matches our fridge pattern; extend it everywhere.
+4. **Tools are just objects** — knives, tongs, extinguisher, even the gas tank: pick up, use, throw. One grab system covers everything.
+5. **Chaos is a *feature with physics rules*, not a fail screen** — fire ignites flammables near heat, spreads to boxes/floor, is fightable (extinguisher), and the kitchen stays wrecked ("you can't turn back time"). Failure is spectacular, legible, and recoverable — not a game-over.
+6. **Score lives in the fiction** — "BEAT MY SCORE" sticky notes. Grading presented diegetically (our order tickets can carry the stars).
+7. **UI minimalism** — tiny contextual keybind hints only while holding something unusual; brief CANCEL affordance during long actions; outline highlight on the focused appliance.
 
-Docking is per-station data (camera anchor transform + allowed actions on the counter). A docked player's character stays leaning at the bench in the world (matters for multiplayer visibility later; a docked player occupies that station).
+## Synthesis: the Yes Chef way (decision)
+The two references pull in opposite directions and the answer is now clear:
 
-**Open question (prototype answers it):** does chopping live in the docked tier (Schedule 1 precision) or the roaming tier (Cooking Simulator holds the knife in FP)? Instinct: prototype **docked first** — precise, readable, easier to make feel good — with FP knife-in-hand as a stretch experiment. The two tiers share all underlying physics either way.
+- **Primary = Cooking Simulator's roaming FP direct manipulation.** Everything happens in first person with physical tools and generous tolerances. This preserves our #1 pillar (first-person immersion) and the multiplayer kitchen (you're never locked away from the room).
+- **Schedule 1's patterns survive as *techniques*, not as a mode**: ghost targets (translucent outlines on the plate/board showing where things go), one-line contextual step hints, batch rhythm, sub-element chores. Applied inside the FP view.
+- **Docked `WorkstationView` is demoted to a *maybe-later assist*** (a lean-in zoom for plating precision or accessibility), only if FP plating tests poorly. Not built in the first pass.
+
+**Difficulty philosophy (explicit, per the dev's call):** low skill floor, high immersion ceiling. Nothing should be *hard to accomplish* — cuts land where you aim with fat tolerances, plating snaps kindly, no action can hard-fail except burning food. The PrepScore rewards care but never gates progress; chaos (dropped food, fires, mess) is the fun consequence layer, always recoverable, never a fail screen.
+
+## Interaction architecture (revised after CookingSim footage)
+
+**One tier: roaming first-person direct manipulation.** E = pickup/place (existing). LMB = use the held tool / work the aimed station (existing `IWorkStation` seam). Holding a tool changes what LMB does; holding nothing keeps today's behavior.
+
+Core mechanic for fine work — the **hover-tool** (the CookingSim knife trick):
+1. Player holds a tool (knife) and aims at a valid work surface (board with choppable item).
+2. The tool detaches from the hold point and **hovers over the aim point on the surface** — a soft-follow ghost of where the action will land (plus a thin projected guide line for the cut).
+3. LMB executes at the hovered position (a quick chop animation + physics cut). Move aim, click again.
+4. Look away / release → tool returns to the hand.
+
+This gives Schedule 1's precision *without* leaving first person: the "cursor" is your look direction; the tolerance is authored generously (cut snaps to the nearest sensible plane within ~2–3 cm).
+
+`WorkstationView` docking is **shelved** unless FP plating tests poorly (kept in git history; would return as an optional lean-in assist, not a requirement).
 
 ## Grading (`PrepScore`) — unchanged framework
 Every gradeable action produces a **PrepScore 0–100** from 2–3 physically measured metrics, weights/tiers per action in `PrepQualitySO` data:
@@ -55,40 +79,52 @@ PrepScore = 100 × Σ (weightᵢ × metricᵢ)      (weights per action type, su
 ## Actions (updated to the simulator model)
 
 ### Chopping (cutting board) — FIRST PROTOTYPE
-- **Docked view:** overhead-ish board view. Ingredient sits on the board physically; knife follows the cursor with a constrained motion (lift → position → slice-drag = one cut).
-- **Physics v1:** ingredient is pre-authored chunks joined by breakable joints; a slice-drag through the body breaks along the nearest joint plane. Cut placement decides evenness. Real mesh slicing only if chunks feel fake.
+- **FP hover-tool:** knife in hand → aim at the board → knife hovers over the aim point with a projected cut-guide line; LMB chops there. Slices are real rigidbodies that tip over and can scatter (board rims/`boardDiscipline` make care matter).
+- **Physics v1:** ingredient is pre-authored chunks joined by breakable joints; the chop breaks the joint nearest the guide plane (snap tolerance ~2–3 cm — low skill floor). Real mesh slicing only if chunks feel fake.
 - **Metrics:** `evenness` (variance of chunk volumes), `completeness` (cuts made / expected), `boardDiscipline` (nothing knocked off the board).
 - Replaces the current LMB-mash on `CuttingCounter`; same `CuttingRecipeSO` data decides inputs/outputs.
 
-### Sauce / marinade brushing
-- **Docked view:** steak/bread/plate on the bench; brush or ladle follows the cursor; painting = raycast splat-map coverage while held over the surface. Finite sauce per scoop — dip to reload (the batch rhythm).
+### Sauce / marinade brushing & pouring
+- **FP hover-tool:** brush/ladle hovers over the aimed surface; hold LMB to paint (raycast splat-map coverage). Finite sauce per scoop — dip to reload (batch rhythm).
+- **Liquid vessels (CookingSim tech):** pots/jugs/bottles get a `LiquidContainer` (fill level + liquid type); tilting a held vessel past a threshold emits a pour stream that fills whatever container/surface it hits. Serves marinades, sauces, and future drinks.
 - **Metrics:** `coverage`, `containment` (spill outside the target), `thickness` uniformity (v2).
 
 ### Plating / assembly (steak dinners)
-- **Docked view:** plate centered; components on side trays — exactly the packaging-station layout (tray → ghost target → plate). Ghost outlines mark steak/sides positions per recipe; drag with snap-with-tolerance.
+- **FP with ghost targets:** recipe projects translucent outlines on the plate (steak here, sides there); place/drop components with kind snap-with-tolerance. The Schedule 1 tray→ghost→vessel rhythm, done from first person.
 - **Metrics:** `order`/`completeness` (right components), `alignment` (final resting positions vs ghosts).
+- If FP precision tests poorly, THIS is the one action that would justify reviving the docked lean-in assist.
 
 ### Cooking (stove/oven) — stays roaming, never docks
 Real-time and world-side: place, listen (sizzle ramps, beeps), pull at the right moment; pan flip stays a physical FP gesture. Cooking must NOT dock — you watch it *while doing other things*; that tension is the game.
 - **Metrics:** `timing` window (already data-driven via chained `CookingRecipeSO`s), `flips` where relevant.
 - **Failure:** burned = hard fail (existing Burned Steak chain). Audio is gameplay: timing learnable by ear (Phase 5 diegetic audio).
 
-### Future chores (same patterns, later)
-Dish washing (docked scrub coverage), fridge restock (batch carry), dough rolling (docked pin motion), rack-of-ribs / tray-of-veg sub-element work (the plant-buds pattern).
+### The chaos layer (CookingSim's lesson — design now, build incrementally)
+Chaos must emerge from the same physics rules as cooking, and always be recoverable:
+- **Fire:** a `Flammable` component (ignition threshold, burn duration, spread radius). Heat sources (stove, burning objects) ignite nearby flammables; fire spreads object-to-object and to floor patches; burns out or is extinguished. **Fire extinguisher** = a held tool spraying a suppression cone. First playable slice: pan left too long → grease fire → spreads to an adjacent cardboard box → extinguisher puts it out.
+- **Mess:** spills/splats (from the splat-map tech) persist on counters/floor; dropped food stays as clutter (dirty/wasted rule, Phase 3).
+- Chaos never ends a run by itself — it costs time, ingredients, and PrepScore, and it makes the post-shift kitchen tell the story of the match.
 
-## Implementation plan (Phase 2, reordered around docking)
-1. **`WorkstationView` + docking**: camera glide to a bench anchor (Cinemachine priority swap), movement/input mode switch (`GameInput.SetPlayerInputActive(false)` + cursor unlock), Esc/E undocks, character stays at bench. Prototype on a CuttingCounter.
-2. **Cursor physics-drag** inside the docked view: grab/hold/release rigidbodies with the mouse (spring-joint drag — the Schedule 1 nugget feel) + ghost-target snap zones.
-3. **Chopping v1** in the docked view (knife-follow + breakable-joint slicing), PrepScore stamped on the output. **Go/no-go feel test.**
-4. **Step-prompt UI** for docked views only (top-center one-liner, per-station step machine).
-5. Then sauce brushing (splat-map tech), then plating (reuses drag + ghosts wholesale), then stove-flip polish.
+### Future chores (same patterns, later)
+Dish washing (scrub coverage), fridge restock (batch carry), dough rolling (pin motion), rack-of-ribs / tray-of-veg sub-element work (the plant-buds pattern).
+
+## Implementation plan (Phase 2, revised for FP-first)
+1. **Held-tool system**: tools (knife first) as grabbable items that occupy the hands and change what LMB does; tool auto-returns to hand after hover-use.
+2. **Hover-tool targeting**: aim-point projection on valid work surfaces + soft-follow tool ghost + projected cut-guide line. (This is the load-bearing feel tech — prototype it dirty and fast.)
+3. **Chopping v1**: breakable-joint ingredient (tomato) + chop-at-guide with snap tolerance; slices as rigidbodies; PrepScore stamped on output. **Go/no-go feel test.**
+4. **Ghost targets + step hints**: translucent placement outlines (plating first) and the one-line contextual hint UI.
+5. **Liquid vessels v1**: `LiquidContainer` fill levels + tilt-to-pour stream + fill detection (sauce pot → ladle → steak).
+6. Then sauce brushing (splat-map), plating pass, stove-flip polish.
+7. **Chaos slice** (stretch, can slip to Phase 3): `Flammable` + grease fire + extinguisher tool.
 
 ## Networking contract (unchanged)
 Docked simulation runs locally on the acting client → `{actionType, targetId, metrics, resultState}` → server validates plausibility bounds (reject impossible speeds/counts; accept everything else) → applies outcome → replicates. Spectators see the character at the bench + the result; tool-motion sync is cosmetic, later.
 
 ## TODO / open questions
-- [ ] Docked vs FP chopping — answered by prototype step 3.
-- [ ] **Cooking Simulator reference footage wanted** (knife/pan handling fully in FP) — it's the counter-example to Schedule 1's docked pattern; would settle the chopping question with evidence. Same capture pipeline: video → `ffmpeg -vf "fps=2,scale=480:270,tile=6x6"` grids.
-- [ ] Multi-grab (Schedule 1 has it) — probably v2 QoL for plating several garnishes.
-- [ ] Does docking auto-place the held item onto the bench input zone? (Probably yes.)
+- [x] Docked vs FP chopping — **decided: FP hover-tool** (the CookingSim footage settled it; docking shelved as a plating-only fallback).
+- [x] Cooking Simulator reference footage — captured + analyzed above.
+- [ ] Hover-tool feel details: does the knife *visibly* leave the hand to hover, or do the FP arms reach with it? (Prototype with a floating knife first; arms come with the Phase 10 rig.)
+- [ ] Pan-flip gesture spec (mouse flick vs timed click) — after chopping ships.
+- [ ] Multi-grab — v2 QoL for plating several garnishes.
 - [ ] `PrepQualitySO` authoring format — define when chopping v1 lands.
+- [ ] Fire/chaos scope guardrails — how far does floor-fire spread go before it's over-scoped? Define the cap when the chaos slice starts.

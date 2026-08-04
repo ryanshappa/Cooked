@@ -70,15 +70,18 @@ Work through phases in order; items within a phase are sized to be one sitting e
 - [x] Draft playtest kitchen: ~13×8m perimeter rectangle (cooking line north w/ oven, delivery west, fridge east, prep tables + entrance south, trash inside) — see `Docs/SceneSetup.md`.
 
 ## Phase 2 — The simulator system (the core twist)
-Design doc: `Docs/Simulator.md` (written — docked-view architecture, per-action designs, grading framework, Schedule 1 footage analysis). This phase is the game's identity; give it the most iteration time. Build order per the doc: docking → cursor drag → chopping v1 (go/no-go) → step prompts → brushing → plating.
-- [ ] **`WorkstationView` docking**: interact at a fine-work station → camera glides to a fixed bench view, movement locks, cursor frees; Esc/E undocks. (The Schedule 1 pattern.)
-- [ ] **Cursor physics-drag** in docked views: spring-joint grab/drag/release of rigidbodies + ghost-target snap zones.
-- [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, plating alignment), weights/tiers in `PrepQualitySO` data; scores stamp the prepped component and roll up into order payout in Phase 3. See `Docs/Simulator.md`.
+Design doc: `Docs/Simulator.md` (Schedule 1 + Cooking Simulator footage analyzed; **decision: FP-first direct manipulation everywhere** — hover-tool for fine work, docked views shelved; low skill floor by design, chaos as a recoverable physics layer). This phase is the game's identity; give it the most iteration time.
+- [ ] **Held-tool system**: tools (knife first) occupy the hands and change what LMB does; auto-return after hover-use.
+- [ ] **Hover-tool targeting**: aim-point projection on work surfaces + soft-follow tool ghost + cut-guide line (the CookingSim knife trick — load-bearing feel tech).
+- [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, plating alignment), weights/tiers in `PrepQualitySO` data; rewards care, never gates progress. See `Docs/Simulator.md`.
 - [ ] **Held-tool system**: player can hold tools (knife, spatula, sauce ladle) with first-person animations; extend carry system to distinguish tools from ingredients.
-- [ ] **Chopping v1**: knife follows a constrained swing; ingredient starts as pre-cut chunks joined by breakable fixed joints (real mesh slicing later only if worth it). Cut quality = slice count/evenness.
-- [ ] **Sauce/marinade brushing v1**: surface with a coverage mask (steak marinade, garlic butter on bread); brush paints via raycast splat-map, success = % coverage.
-- [ ] **Plating/assembly v1**: physically arrange steak + sides on the plate; snap-with-tolerance so it's tactile but not rage-inducing; sloppiness affects order score.
-- [ ] **Pan/stove v1**: pan is a physics container, flip gesture for patties; food visibly changes state (raw→cooked→burned materials + smoke VFX hook).
+- [ ] **Chopping v1** (go/no-go feel test): breakable-joint ingredient + chop-at-guide with fat snap tolerance; slices as rigidbodies.
+- [ ] **Ghost targets + step hints**: translucent placement outlines (plating) and one-line contextual hint UI.
+- [ ] **Liquid vessels v1**: `LiquidContainer` fill levels + tilt-to-pour streams + fill detection (sauce pot → ladle → steak) — the CookingSim liquid tech.
+- [ ] **Sauce/marinade brushing v1**: coverage splat-map painting via hover-brush; success = % coverage.
+- [ ] **Plating/assembly v1**: place steak + sides onto recipe ghost outlines with kind snap tolerance; sloppiness affects score only.
+- [ ] **Pan/stove v1**: pan as physics container, flip gesture; food visibly changes state (raw→cooked→burned + smoke VFX hook).
+- [ ] **Chaos slice** (stretch → may slip to Phase 3): `Flammable` component, grease fire spread, extinguisher tool. Chaos is recoverable, never a fail screen.
 - [ ] Replace the CuttingCounter/StoveCounter bar interactions from Phase 1 with simulator actions behind the same recipe SO data (cooking stays roaming/world-side by design — never docks).
 - [ ] Playtest pass: tune each action to be learnable in <1 minute (they must be teachable in the break room later).
 
