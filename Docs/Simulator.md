@@ -109,8 +109,8 @@ Chaos must emerge from the same physics rules as cooking, and always be recovera
 Dish washing (scrub coverage), fridge restock (batch carry), dough rolling (pin motion), rack-of-ribs / tray-of-veg sub-element work (the plant-buds pattern).
 
 ## Implementation plan (Phase 2, revised for FP-first)
-1. **Held-tool system**: tools (knife first) as grabbable items that occupy the hands and change what LMB does; tool auto-returns to hand after hover-use.
-2. **Hover-tool targeting**: aim-point projection on valid work surfaces + soft-follow tool ghost + projected cut-guide line. (This is the load-bearing feel tech — prototype it dirty and fast.)
+1. **Held-tool system** ✅ — `Tool` component on ordinary kitchen objects (Knife.prefab + SO; carry/place/drop free via KitchenObject). Holding the knife changes what LMB does.
+2. **Hover-tool targeting** ✅ — `PlayerToolUse` on the Player: holding the knife + aiming at a CuttingCounter with a choppable item → the hold point glides (Lerp 14/s) to hover 14cm over the aim point via `PlayerCarry.SetHoldOverride`; a red `LineRenderer` guide marks the cut plane (cut axis = counter local X, aim slides it); LMB runs a dip-chop coroutine and calls `CuttingCounter.ChopAt(t)` with the normalized position. Evenness (1 − normalized variance of slice widths) is computed on completion and logged as a PrepScore preview. Knife blade axis = mesh Z; `Tool.hoverRotationEuler` is the per-model orientation fix-up knob.
 3. **Chopping v1**: breakable-joint ingredient (tomato) + chop-at-guide with snap tolerance; slices as rigidbodies; PrepScore stamped on output. **Go/no-go feel test.**
 4. **Ghost targets + step hints**: translucent placement outlines (plating first) and the one-line contextual hint UI.
 5. **Liquid vessels v1**: `LiquidContainer` fill levels + tilt-to-pour stream + fill detection (sauce pot → ladle → steak).

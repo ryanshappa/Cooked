@@ -23,7 +23,9 @@ Snapshot of what's in the active scene and how it's wired, so either machine can
 | West (x=−6.4, rot 90) | Clear · **Delivery** · Clear |
 | East (x=6.4, rot 270) | Clear · **Fridge** · Clear |
 | South (z=−4.6, rot 0) | Clear ×2 · KitchenTable · **entrance gap** · KitchenTable · Clear ×2 |
-| Inside | `TrashBin` at SE corner (5.3, −3.4); Player spawns center (0, −1); loose Tomato/Cheese on the two north Clear counters |
+| Inside | `TrashBin` at SE corner (5.3, −3.4); Player spawns center (0, −1); loose Tomato/Cheese on the two north Clear counters; **Knife** on the east KitchenTable |
+
+`Player` components now include `PlayerToolUse` (hover-tool driver; needs GameInput ref + Interactable mask).
 
 Counter fronts face +z at rot 0 (handles/knobs side). ⚠️ Scene instances must come from `_Assets/Prefabs/Counters/` — identical-looking *Pandazole pack* prefab instances were silently in the scene once (fridge AND table); pack prefabs get none of our components. ⚠️ Editor-scripting note: `GameObject.Find` matches same-named *children* (Tomato/Bake/wall roots all have same-named kids) — always resolve scene roots via `scene.GetRootGameObjects()`.
 

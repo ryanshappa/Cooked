@@ -71,8 +71,8 @@ Work through phases in order; items within a phase are sized to be one sitting e
 
 ## Phase 2 — The simulator system (the core twist)
 Design doc: `Docs/Simulator.md` (Schedule 1 + Cooking Simulator footage analyzed; **decision: FP-first direct manipulation everywhere** — hover-tool for fine work, docked views shelved; low skill floor by design, chaos as a recoverable physics layer). This phase is the game's identity; give it the most iteration time.
-- [ ] **Held-tool system**: tools (knife first) occupy the hands and change what LMB does; auto-return after hover-use.
-- [ ] **Hover-tool targeting**: aim-point projection on work surfaces + soft-follow tool ghost + cut-guide line (the CookingSim knife trick — load-bearing feel tech).
+- [x] **Held-tool system**: `Tool` component; Knife prefab/SO (35cm, from the KC knife mesh); tools are ordinary carryable kitchen objects.
+- [x] **Hover-tool targeting**: `PlayerToolUse` — knife glides to hover over the aim point on a choppable cutting board, red cut-guide line, LMB dip-chops at that position; chop positions feed a live evenness metric. Feel-tuning knobs: hoverHeight, glide speed, chop dip/raise times, `Tool.hoverRotationEuler`.
 - [ ] **Prep grading system (`PrepScore`)**: per-action 0–100 score from measurable physics metrics (slice evenness, coverage %, cook-timing window, plating alignment), weights/tiers in `PrepQualitySO` data; rewards care, never gates progress. See `Docs/Simulator.md`.
 - [ ] **Held-tool system**: player can hold tools (knife, spatula, sauce ladle) with first-person animations; extend carry system to distinguish tools from ingredients.
 - [ ] **Chopping v1** (go/no-go feel test): breakable-joint ingredient + chop-at-guide with fat snap tolerance; slices as rigidbodies.

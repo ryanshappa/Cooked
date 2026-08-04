@@ -15,11 +15,35 @@ public class PlayerCarry : MonoBehaviour, IKitchenObjectParent
         dynamicHoldPoint = holdPointObj.transform;
     }
 
+    // While set, the hold point glides to this pose instead of the camera
+    // offset — used by the hover-tool (knife floating over the cut point).
+    private bool hasHoldOverride;
+    private Vector3 overridePos;
+    private Quaternion overrideRot;
+    [SerializeField] private float overrideGlideSpeed = 14f;
+
+    public void SetHoldOverride(Vector3 pos, Quaternion rot)
+    {
+        hasHoldOverride = true;
+        overridePos = pos;
+        overrideRot = rot;
+    }
+
+    public void ClearHoldOverride() => hasHoldOverride = false;
+
     void Update()
     {
-        // Update hold point position every frame for immediate response
-        if (dynamicHoldPoint != null && cameraTransform != null)
+        if (dynamicHoldPoint == null || cameraTransform == null) return;
+
+        if (hasHoldOverride)
         {
+            float k = overrideGlideSpeed * Time.deltaTime;
+            dynamicHoldPoint.position = Vector3.Lerp(dynamicHoldPoint.position, overridePos, k);
+            dynamicHoldPoint.rotation = Quaternion.Slerp(dynamicHoldPoint.rotation, overrideRot, k);
+        }
+        else
+        {
+            // Zero-lag carry (the shipped feel — don't smooth this)
             dynamicHoldPoint.position = cameraTransform.position + cameraTransform.TransformDirection(holdOffset);
             dynamicHoldPoint.rotation = cameraTransform.rotation;
         }

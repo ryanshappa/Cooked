@@ -23,7 +23,7 @@ Station catalog (grows through Phase 1):
 | `ContainerCounter` | spawns its `kitchenObjectSO` into the player's hands | **no** | generic instant dispenser — currently unused (kept for crates/simple sources); `OnPlayerGrabbedObject` event |
 | `FridgeCounter` (fridge body) | nothing (doors handle interaction) | **no** | body is just a blocker/anchor for the doors + stock |
 | `PlatesCounter` | nothing (the display plate on top is the grab point) | **no** | grab the plate stack to receive a fresh `Plate` |
-| `CuttingCounter` | — (E places/picks up; **LMB chops** via `IWorkStation`) | only items with a **CuttingRecipeSO** | after `cutsRequired` chops the item becomes the recipe output; squash-scale placeholder feedback |
+| `CuttingCounter` | — (E places/picks up; **chopping requires the held Knife** — hover-tool aims the cut, LMB chops at that spot) | only items with a **CuttingRecipeSO** | `ChopAt(t)` records normalized cut positions; after `cutsRequired` chops the output spawns and an **evenness** metric (variance of slice widths) is computed — the first live PrepScore ingredient. Bare-hand LMB no longer chops. |
 | `StoveCounter` | — (cooking is automatic) | only items with a **CookingRecipeSO** | timer per occupant; chained recipes give Cooked→Burned; `GetCookProgress()` for future UI/audio |
 | `DeliveryCounter` | — | **plates only** (`PlateHolder` present — the inverse of the plate's own filter) | plate despawns ("delivered") ~0.6s after set down, food and all; Phase 3 adds order validation + payment here |
 
