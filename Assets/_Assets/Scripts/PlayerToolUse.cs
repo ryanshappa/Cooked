@@ -87,11 +87,12 @@ public class PlayerToolUse : MonoBehaviour
         var b = rends[0].bounds;
         foreach (var r in rends) b.Encapsulate(r.bounds);
 
-        // View-relative cutting: the cut plane slides along your flattened look
-        // direction (look up/down = nearer/farther cut), and the cut line runs
-        // left-right across your view. No mode switch — leaning in IS the focus.
-        Vector3 axis = cameraTransform.forward; axis.y = 0f; axis.Normalize();
-        Vector3 lineDir = cameraTransform.right; lineDir.y = 0f; lineDir.Normalize();
+        // Real chopping posture (see Docs/Videos/Knife + dev's reference shot):
+        // the knife points FORWARD (away from you), blade vertical, so the cut
+        // plane contains your view direction. Looking left/right slides the
+        // slice along the item; the guide line runs front-to-back.
+        Vector3 axis = cameraTransform.right; axis.y = 0f; axis.Normalize();      // slide direction (aim left/right)
+        Vector3 lineDir = cameraTransform.forward; lineDir.y = 0f; lineDir.Normalize();  // knife + guide direction
         if (axis.sqrMagnitude < 0.001f || lineDir.sqrMagnitude < 0.001f) return false;
 
         Vector3 center = b.center;
