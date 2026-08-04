@@ -22,6 +22,10 @@ Each frame `PlayerInteract.ResolveTarget()`:
 
 `HasPrompt(out text)` exposes a contextual prompt string ("Pick up Tomato", "Place Cheese", …). **The HUD no longer renders it** — text prompts were removed by design (Aug 2026): the plain crosshair is the only aim feedback; physical affordances carry the meaning. The API and `PlayerInteractUI.cs` are kept for the break-room practice stations (Phase 7), where wordy tutorial prompts are welcome.
 
+**Blue hover outline (`TargetHighlighter` + `YesChef/Outline` shader):** whatever the system currently targets for **Pickup** or **Use** (items, fridge doors, grab points — not bare counters) gets a world-space inverted-hull outline (`OutlineBlue.mat`). It tracks the target, so it disappears the instant you pick the item up. Cooking Simulator-style.
+
+**Pierce-through targeting:** the empty-hand ray walks all hits front-to-back and pierces through *empty* surfaces (so a knife lying inside a table slot's raised collider is still reachable), but stops at dedicated interactables (a closed fridge door blocks reaching the shelf items behind it). Occupied surfaces still forward to their item.
+
 `PlayerCarry`: a `DynamicHoldPoint` transform repositioned every frame at camera + `holdOffset` — set to **(0, 0, 0.7)**, i.e. dead-center on the reticle. Held objects glue to it with zero lag, centered by collider bounds (see KitchenObjectSystem.md).
 
 ## Scene/Inspector wiring

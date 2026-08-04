@@ -25,6 +25,7 @@ Kitchen objects (ingredients, later plates/tools) are physical items that can ex
 - Ordering matters and was bug-prone: `isKinematic=false` must be set *before* assigning velocities. Don't "simplify" this.
 - Pickup/place goes through the unified `PlayerInteract` (see InteractionSystem.md); `KitchenObject` no longer implements `IInteractable`.
 - **Collider hygiene rule** (learned the hard way): the interaction collider must tightly match the *visual* bounds — mismatched colliders make the reticle/prompt feel broken. Colliders live in the prefab, never as scene-instance additions. (Aug 2026: Tomato's collider was scene-only + offset below the visual; "Cheese" was a hacked Tomato-prefab instance — both fixed, Cheese promoted to its own prefab.)
+- **Real-world sizing rule:** ingredients should be actual food size — a big tomato is ~9cm (root scale 0.15 on the pack model), not 24cm. Oversized items also *feel* wrong held: everything centers at 0.7m from the camera, so a big item's near face looms close. Size the item, not the hold distance.
 
 `KitchenObjectSO` is minimal data for now; it becomes the currency of recipes (`CuttingRecipeSO`, `RecipeSO`) in Phases 1–3. Planned Phase 0 addition: static `KitchenObject.Spawn(so, parent)` / `Destroy` helpers so all instantiation is centralized (prereq for clean NGO spawning in Phase 4).
 

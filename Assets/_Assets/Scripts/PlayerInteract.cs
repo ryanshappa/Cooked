@@ -106,28 +106,56 @@ public class PlayerInteract : MonoBehaviour
         {
             if (!hasHit) return;
 
-            var ko = hit.collider.GetComponentInParent<KitchenObject>();
-            if (ko != null && ko.GetParent() is not PlayerCarry)
+            // Walk all hits front-to-back, piercing through EMPTY surfaces so
+            // loose items resting inside slot collider volumes (a knife on the
+            // table) stay reachable. Anything with its own interactable that
+            // is NOT the surface itself (fridge doors, grab points) stops the
+            // ray — no grabbing through closed doors.
+            var hits = Physics.RaycastAll(cameraTransform.position, cameraTransform.forward,
+                maxDistance, interactMask, QueryTriggerInteraction.Collide);
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            IInteractable fallbackUse = null;
+            foreach (var h in hits)
             {
-                targetKitchenObject = ko;
-                action = InteractAction.Pickup;
-                return;
+                var ko = h.collider.GetComponentInParent<KitchenObject>();
+                if (ko != null && ko.GetParent() is not PlayerCarry)
+                {
+                    targetKitchenObject = ko;
+                    action = InteractAction.Pickup;
+                    return;
+                }
+
+                var inter = h.collider.GetComponentInParent<IInteractable>();
+                var surf = h.collider.GetComponentInParent<IKitchenObjectParent>();
+
+                if (surf != null && !ReferenceEquals(surf, carry)
+                    && (inter == null || ReferenceEquals(inter, surf)))
+                {
+                    if (surf.HasKitchenObject())
+                    {
+                        // occupied surface counts as aiming at its item
+                        targetKitchenObject = surf.GetKitchenObject();
+                        action = InteractAction.Pickup;
+                        return;
+                    }
+                    if (fallbackUse == null) fallbackUse = inter;
+                    continue;   // empty surface: pierce through
+                }
+
+                if (inter != null)
+                {
+                    targetInteractable = inter;
+                    action = InteractAction.Use;
+                    return;
+                }
+
+                break;   // plain world geometry blocks the ray
             }
 
-            // Hitting an occupied surface counts as aiming at its item (slot
-            // colliders can enclose the item and shadow it from the ray).
-            var surface2 = hit.collider.GetComponentInParent<IKitchenObjectParent>();
-            if (surface2 != null && !ReferenceEquals(surface2, carry) && surface2.HasKitchenObject())
+            if (fallbackUse != null)
             {
-                targetKitchenObject = surface2.GetKitchenObject();
-                action = InteractAction.Pickup;
-                return;
-            }
-
-            var interactable = hit.collider.GetComponentInParent<IInteractable>();
-            if (interactable != null)
-            {
-                targetInteractable = interactable;
+                targetInteractable = fallbackUse;
                 action = InteractAction.Use;
             }
         }
@@ -153,6 +181,18 @@ public class PlayerInteract : MonoBehaviour
     }
 
     public InteractAction GetCurrentAction() => action;
+
+    /// The object the highlight outline should wrap: pickup targets and
+    /// dedicated interactables (doors, grab points) — not bare counters.
+    public GameObject GetHighlightTarget()
+    {
+        if (action == InteractAction.Pickup && targetKitchenObject != null)
+            return targetKitchenObject.gameObject;
+        if (action == InteractAction.Use && targetInteractable != null
+            && targetInteractable is not BaseCounter)
+            return targetInteractable.GetTransform().gameObject;
+        return null;
+    }
 
     public bool HasPrompt(out string text)
     {
