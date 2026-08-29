@@ -19,18 +19,19 @@ Reference material: Code Monkey's Kitchen Chaos free course + its multiplayer fo
 
 | Thing | Choice |
 |---|---|
-| Engine | Unity **6000.1.15f1**, upgrading to **Unity 6.5 (6000.5.x)** as the first Phase 0 task — see `Docs/PLAN.md` Decision 1. Keep Mac + PC on the exact same version; version bumps are their own commit. |
-| Render pipeline | URP 17.1 |
-| Input | Input System 1.14.2 (`InputSystem_Actions.inputactions`, wrapped by `GameInput`) |
-| Camera | Cinemachine 3.1.4 — `Main Camera` has a `CinemachineBrain`; `FirstPersonCamera` (CinemachineCamera + PanTilt + HardLockToTarget + InputAxisController) does the FP look |
-| Netcode | **Netcode for GameObjects 2.4.4** (already installed) |
-| Sessions/voice (planned) | UGS **Multiplayer Services SDK (Sessions API)** — Auth + Lobby + Relay in one package — plus **Vivox** for positional proximity voice. Facepunch Steamworks comes later as an alternate transport/platform layer at Steam release. All connectivity code lives in one `MultiplayerBootstrap` class. Full reasoning: `Docs/PLAN.md` Decisions 2–3. |
+| Engine | Unity **6000.5.2f1** (the Phase 0 upgrade landed — `Docs/PLAN.md` Decision 1). Keep Mac + PC on the exact same version; version bumps are their own commit. Note: the Extraterrestrial project is on this same version, which is what makes its netcode port drop-in. |
+| Render pipeline | URP 17.5.0 |
+| Input | Input System 1.20.0 (`InputSystem_Actions.inputactions`, wrapped by `GameInput`) |
+| Camera | Cinemachine 3.1.7 — `Main Camera` has a `CinemachineBrain`; `FirstPersonCamera` (CinemachineCamera + PanTilt + HardLockToTarget + InputAxisController) does the FP look |
+| Netcode | **FishNet 4.7.2** (client-hosted) — *decided 2026-08-28, replacing NGO*. Ported from the sibling project `C:\Unity\Projects\Extraterrestrial` (same dev, same Unity version, working code). NGO 2.13.1 is still in `manifest.json` but unused — remove it at the start of Phase 4. |
+| Transport / Steam (planned) | **Facepunch.Steamworks 2.5.2** + **FishyFacepunch 4.1.0** (Steam P2P) alongside **Tugboat** (UDP, editor/LAN) via **Multipass** — Steam lobbies and overlay invites are the multiplayer UX from Phase 4, not a late swap. Dev appid 480 until we have a store page. Connectivity lives in three seams only: `SteamBootstrap` / `NetworkBootstrap` / `LobbyService`. |
+| Voice (planned) | **Dissonance Voice Chat 9.0.9** + the vendored MIT `DissonanceVoiceForFishNet` shim — voice rides the FishNet session (no second connection, no cloud service). Ported with its three upstream bug fixes; rolloff **must** be re-tuned for a 13×8 m kitchen. Full reasoning: `Docs/PLAN.md` Decisions 2–3. |
 | Editor automation | **MCP for Unity is set up and connected** — use it (with the `unity-mcp-skill`) for scene/prefab/component/script work instead of hand-editing YAML. Take screenshots to verify visual changes. |
 | Asset creation | Blender MCP is also connected for modeling help. Art packs on hand: Pandazole Ultimate Pack, "PizzA" pack (pizza oven, kitchen props). |
 
 ## Repo layout & conventions
 
-- All original work lives in `Assets/_Assets/` (Scripts, Prefabs, ScriptableObjects, Materials…). Third-party packs stay in their own top-level folders. The active scene is currently `Assets/Scenes/SampleScene.unity`.
+- All original work lives in `Assets/_Assets/` (Scripts, Prefabs, ScriptableObjects, Materials…). Third-party packs stay in their own top-level folders. The active scene is `Assets/Scenes/GameScene.unity`.
 - Scripts: one class per file, PascalCase, no namespace currently (fine for now). Interfaces prefixed `I`.
 - ScriptableObjects: `<Thing>SO` classes, assets in `Assets/_Assets/ScriptableObjects/<Type>/`.
 - Layer 6 is the interactable/kitchen-object layer (counters, Tomato, Cheese live there). Layer usage is not yet formalized — see Phase 0.
@@ -95,24 +96,30 @@ Design doc: `Docs/Simulator.md` (Schedule 1 + Cooking Simulator footage analyzed
 - [ ] Pause menu + options (sensitivity, volume) with `GameInput` map switching (Player ↔ UI).
 - [ ] First-person polish pass: interact prompts as world-space UI on stations, crosshair states.
 
-## Phase 4 — Multiplayer (NGO + UGS)
-Follow the Kitchen Chaos multiplayer course structure, adapted to first-person.
-- [ ] Decide + document authority model: server-authoritative kitchen objects and counters, owner-authoritative player movement. `Docs/Multiplayer.md`.
-- [ ] Convert Player to `NetworkBehaviour`: ownership checks, spawn points, client network transform for movement, sync look direction for head/animation.
+## Phase 4 — Multiplayer (FishNet + Steam)
+**Stack decided 2026-08-28: port the connection layer from `C:\Unity\Projects\Extraterrestrial` rather than write it (see `Docs/PLAN.md` Decision 2).** The Kitchen Chaos course's *architecture* lessons still apply (server-auth kitchen objects, event-driven managers, one spawn seam); its NGO API calls are now reference-only.
+- [ ] **Strip NGO**: remove `com.unity.netcode.gameobjects` + `com.unity.multiplayer.center` from `manifest.json`, delete `Assets/DefaultNetworkPrefabs.asset`. Nothing references them (verified 2026-08-28).
+- [ ] **Copy the stack in** — folders, not package imports (their whole stack is vendored under `Assets/`, nothing in `manifest.json`): patched `Assets/FishNet/` (FishNet 4.7.2 + Tugboat + Multipass + FishyFacepunch, **carrying all three local patches**), `Facepunch/` DLLs + natives, Dissonance's two folders. **Do not re-import FishNet fresh — a clean 4.7.2 does not compile on Unity 6000.5.** Project compiles; single-player press-play byte-identical.
+- [ ] **Port the three seams** into `Assets/_Assets/Scripts/Net/`: `SteamBootstrap` (Steam init behind the editor-without-Steam guard), `NetworkBootstrap` (`HostLocal`/`JoinLocal`/`HostSteam`/`JoinSteam`/`Leave` — the only place transports are named), `LobbyService` (create/invite/join by host SteamId), plus `NetDevPanel` for two-client testing.
+- [ ] **Localhost duo first** (Tugboat, two chefs in one kitchen) — prove the FishNet loop before Steam variables enter. Then the Steam path: lobby + overlay invite, two accounts. Watch the known trap: FishyFacepunch *returns false* instead of throwing when Steam is absent, so `HostLocal` must start Tugboat by index and Steam best-effort.
+- [ ] Decide + document authority model: host-authoritative kitchen objects and counters, owner-authoritative player movement. `Docs/Multiplayer.md`.
+- [ ] Convert Player to a FishNet `NetworkBehaviour`: ownership checks, spawn points, owner-authoritative movement sync, replicate look direction for head/animation.
 - [ ] Player-player physicality: chefs get colliders and can bump each other; a hard bump knocks the held item out of the victim's hands (→ dirty/wasted food rule from Phase 3).
-- [ ] Convert KitchenObject to `NetworkObject`: spawn/despawn through server, NGO parenting instead of raw `transform.SetParent`; decide how the *physics drop* state replicates (server-sim transform sync is fine).
-- [ ] Convert all counters + OrderManager + GameManager to networked (server runs logic; clients get NetworkVariables/ClientRpcs for feedback).
-- [ ] Simulator networking: docked/roaming actions run on the interacting client, client reports metrics, server validates plausibility and applies outcome (keeps physics feel local; contract in `Docs/Simulator.md`).
-- [ ] UGS setup: project link, anonymous Authentication.
-- [ ] Lobby service: create/join (code + quick join), lobby list UI, heartbeat/poll.
-- [ ] Relay: allocate on host, join via code, wire into `UnityTransport`; keep all UGS bootstrap in one `MultiplayerBootstrap` class so a Steam transport can slot in later.
+- [ ] Convert KitchenObject to a FishNet `NetworkObject`: spawn/despawn through the host, networked parenting instead of raw `transform.SetParent`; decide how the *physics drop* state replicates (host-sim transform sync is fine). **Pickup = ownership transfer through one pathway only** (Extraterrestrial's `ItemOwnership` rule — no other code may change ownership).
+- [ ] Convert all counters + OrderManager + GameManager to networked (host runs logic; clients get SyncVars/observer RPCs for feedback).
+- [ ] Simulator networking: actions run on the interacting client, which reports metrics; the host validates plausibility and applies the outcome (keeps physics feel local; contract in `Docs/Simulator.md`). **Slicing replicates as the cut plane `(origin, normal)`, never vertex data** — see `Docs/MeshSlicing.md`.
+- [ ] Steam lobby UX: create (max 4) on host, overlay invite, join-by-SteamId fallback (the overlay does not inject reliably — Extraterrestrial hit this), lobby state in the break room.
 - [ ] Disconnect handling: host migration is out of scope — clean "host left" flow back to menu; a disconnecting player drops their held object.
-- [ ] 2-instance test workflow: Multiplayer Play Mode package + a written smoke-test checklist.
+- [ ] 2-instance test workflow: editor + build on two Steam accounts, written as a five-minute ritual (Extraterrestrial's `NETWORKING_PLAN.md` has the step-by-step to adapt).
 
-## Phase 5 — Voice & audio
-- [ ] Vivox setup: positional (3D) channel joined on entering lobby/game; audio position taps the player head transform.
-- [ ] Tune falloff so voice range ≈ half the kitchen; verify far players are genuinely hard to hear, and direction is audible with headphones.
-- [ ] Push-to-talk vs open-mic option; speaking indicator over character heads.
+## Phase 5 — Voice & audio (Dissonance)
+**Ported with the netcode (`Docs/PLAN.md` Decision 3): Dissonance rides the FishNet session — no second connection, no cloud service.**
+- [ ] Import Dissonance + vendor the `DissonanceVoiceForFishNet` shim **with its three upstream fixes** (the `PlayerId` lazy-cache bug silently disables positional tracking — do not re-discover it).
+- [ ] Voice lives on a dedicated **net rig prefab** (`DissonanceComms` → playback prefab + FishNet comms + a `Global`-room broadcast/receipt trigger pair with positional broadcast on), NOT woven into the chef prefab; the chef carries only `DissonanceFishNetPlayer` + a `VoiceAnchor` transform at eye height. **Take only the NetworkManager + Voice children of their `NetRig.prefab`** — its Main Camera/`AudioListener`/Cinemachine rig would collide with ours, and Dissonance needs exactly one AudioListener.
+- [ ] **Re-tune rolloff for a kitchen** — Extraterrestrial's min 10 m / max 1000 m is planet-scale and would delete the pillar. Start ≈ min 2–3 m / max 15–20 m; verify range ≈ half the kitchen, far players genuinely hard to hear, direction audible on headphones.
+- [ ] Add a `Player/PushToTalk` action (V) to `InputSystem_Actions` — `VoiceSettings` finds it by that exact string and fails silently if absent.
+- [ ] Mic modes: Voice Activation default, PTT/PTM selectable; speaking indicator over character heads; per-player volume/mute (`VoicePlayerState.Volume` / `IsLocallyMuted`).
+- [ ] Copy the audio settings that were already paid for in playtests: Opus 48 kHz / High / FEC on; **RNN suppression OFF + WebRTC denoise Moderate** (stacked suppressors make voices watery); doppler **0** on the voice source.
 - [ ] Diegetic SFX pass: stove sizzle, timer beeps, chopping thunks, order-ticket printer — all 3D spatial sources so they compete with voice on purpose.
 - [ ] Mixer setup: buses for Voice / SFX / Music.
 - [ ] Music: main theme + in-game loop that intensifies in the last 60s (compose with AI tools or license; track choices in `Docs/Audio.md`).
