@@ -16,7 +16,7 @@ Each system doc covers:
 ## Index
 
 ### Written (systems that exist)
-- [PLAN.md](PLAN.md) — architecture decisions & technical plan (Unity 6.5, NGO + Sessions, Vivox, custom kitchen generator, asset strategy)
+- [PLAN.md](PLAN.md) — architecture decisions & technical plan (Unity 6.5, **FishNet + Steam** and **Dissonance voice** ported from the Extraterrestrial project, custom kitchen generator, asset strategy)
 - [PlayerController.md](PlayerController.md) — first-person movement, collision, camera rig
 - [InputSystem.md](InputSystem.md) — Input System actions + `GameInput` wrapper
 - [InteractionSystem.md](InteractionSystem.md) — look-at raycasting, interact prompts, pickup/carry/drop
@@ -24,12 +24,13 @@ Each system doc covers:
 - [SceneSetup.md](SceneSetup.md) — current test scene contents and wiring
 - [Simulator.md](Simulator.md) — the simulator system: docked station views, direct-manipulation cooking actions, PrepScore grading (design doc + Schedule 1 reference-footage analysis; Phase 2 builds it)
 - [Counters.md](Counters.md) — BaseCounter + station catalog (ClearCounter, ContainerCounter/fridge)
+- [MeshSlicing.md](MeshSlicing.md) — dynamic knife cutting: plane-slicing design, research (Cooking Simulator, EzySlice), lineage/recipe model, build plan
 
 ### Planned (create when the system is built)
 - OrdersAndScoring.md — recipes, order manager, scoring/money (Phase 3)
 - GameLoop.md — GameManager state machine, modes (Phases 3 & 9)
-- Multiplayer.md — NGO architecture, authority model, UGS Lobby/Relay (Phase 4)
-- VoiceAndAudio.md — Vivox proximity chat, SFX/mixer design (Phase 5)
+- Multiplayer.md — FishNet architecture, authority model, Steam lobby/invites (Phase 4)
+- VoiceAndAudio.md — Dissonance proximity chat, SFX/mixer design (Phase 5)
 - KitchenGeneration.md — procedural layout rules and generator (Phase 6)
 - BreakRoom.md — physical lobby, ready-up, practice stations (Phase 7)
 - Progression.md — money persistence, cosmetics, shop (Phase 8)

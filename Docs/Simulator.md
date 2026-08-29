@@ -80,8 +80,8 @@ PrepScore = 100 × Σ (weightᵢ × metricᵢ)      (weights per action type, su
 
 ### Chopping (cutting board) — FIRST PROTOTYPE
 - **FP hover-tool:** knife in hand → aim at the board → knife hovers over the aim point with a projected cut-guide line; LMB chops there. Slices are real rigidbodies that tip over and can scatter (board rims/`boardDiscipline` make care matter).
-- **Physics v1:** ingredient is pre-authored chunks joined by breakable joints; the chop breaks the joint nearest the guide plane (snap tolerance ~2–3 cm — low skill floor). Real mesh slicing only if chunks feel fake.
-- **Metrics:** `evenness` (variance of chunk volumes), `completeness` (cuts made / expected), `boardDiscipline` (nothing knocked off the board).
+- **Physics (decided Aug 28 2026 — real mesh slicing, not pre-authored chunks):** the chop splits the ingredient's mesh on the exact blade plane (EzySlice) into two rigidbody pieces that can be cut again; a min-mass gate stops infinite slicing. Full design + build plan: [`MeshSlicing.md`](MeshSlicing.md).
+- **Metrics:** `evenness` (coefficient of variation of piece volumes), `completeness` (recipe piece rule met), `boardDiscipline` (nothing knocked off the board).
 - Replaces the current LMB-mash on `CuttingCounter`; same `CuttingRecipeSO` data decides inputs/outputs.
 
 ### Sauce / marinade brushing & pouring
@@ -113,7 +113,7 @@ Dish washing (scrub coverage), fridge restock (batch carry), dough rolling (pin 
 2. **Hover-tool targeting** ✅ — `PlayerToolUse` on the Player: holding the knife + aiming at a CuttingCounter with a choppable item → the hold point glides (Lerp 14/s) to hover 14cm over the aim point via `PlayerCarry.SetHoldOverride`; a red `LineRenderer` guide marks the cut plane; LMB runs a dip-chop coroutine and calls `CuttingCounter.ChopAt(t)`. Evenness (1 − normalized variance of slice widths) is computed on completion and logged as a PrepScore preview.
    - **Cutting is view-relative**: the cut plane slides along your flattened look direction and the cut line runs left-right across your view — leaning close to the counter *is* the focus mode (hover engages only within **1.4m**). The cut position comes from intersecting the view ray with the horizontal plane at the *item's top*, clamped to the item's bounds — pitch sweeps front edge → back edge smoothly and can never leave the item. The guide is a **staple** (down both sides of the item) so the vertical cut plane reads clearly.
    - **Tool poses**: rotation policy lives entirely in `PlayerCarry`'s hold point (the KitchenObject glue just follows it). Held tools are **yaw-only level** — the knife keeps its blade down and horizontal no matter the camera pitch (full-camera glue made it nose-dive when looking down at counters). Knife = the slim chef mesh (`KitchenObjectsVisuals/Knife.fbx`, 35cm, blade-vertical at identity); held (0,−30,0), hover identity; flip Z 180 on both if the cutting edge turns out to face up. The cutting board's decorative prop knife is hidden in our CuttingCounter prefab.
-3. **Chopping v1**: breakable-joint ingredient (tomato) + chop-at-guide with snap tolerance; slices as rigidbodies; PrepScore stamped on output. **Go/no-go feel test.**
+3. **Chopping v1** — real mesh slicing (cheese first): `Sliceable.TrySlice(plane)` at the bottom of the knife dip; pieces are loose `KitchenObject`s on the board. Steps 1–2 of `MeshSlicing.md` landed Aug 28 2026; **go/no-go feel test pending** (dev to play it).
 4. **Ghost targets + step hints**: translucent placement outlines (plating first) and the one-line contextual hint UI.
 5. **Liquid vessels v1**: `LiquidContainer` fill levels + tilt-to-pour stream + fill detection (sauce pot → ladle → steak).
 6. Then sauce brushing (splat-map), plating pass, stove-flip polish.

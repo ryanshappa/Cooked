@@ -29,9 +29,9 @@ public class PlayerToolUse : MonoBehaviour
     private bool hovering;
     private bool chopping;
 
-    private CuttingCounter targetCounter;
-    private float cutT;
-    private Vector3 cutPointWorld;
+    private Sliceable targetSliceable;
+    private Vector3 cutPointWorld;    // a point on the cut plane (top of the item, under the guide)
+    private Vector3 cutNormal;        // cut-plane normal (horizontal, perpendicular to the blade)
     private Quaternion hoverRot;
 
     void Awake()
@@ -70,8 +70,9 @@ public class PlayerToolUse : MonoBehaviour
             StartCoroutine(ChopRoutine());
     }
 
-    /// Valid hover = holding a knife + aiming at a cutting board with a
-    /// choppable occupant. Computes the cut position from the aim point.
+    /// Valid hover = holding a knife + aiming at a Sliceable resting on a cutting
+    /// board (either the board's slotted occupant or a loose cut piece lying on
+    /// it). Computes the cut plane from the aim point.
     private bool TryResolveHover()
     {
         var held = carry.GetKitchenObject();
@@ -82,11 +83,10 @@ public class PlayerToolUse : MonoBehaviour
                 out RaycastHit hit, maxDistance, interactMask, QueryTriggerInteraction.Collide))
             return false;
 
-        var counter = hit.collider.GetComponentInParent<CuttingCounter>();
-        if (counter == null || !counter.HasChoppableOccupant()) return false;
+        var sliceable = ResolveSliceable(hit.collider, hit.point);
+        if (sliceable == null) return false;
 
-        var occupant = counter.GetKitchenObject();
-        var rends = occupant.GetComponentsInChildren<Renderer>();
+        var rends = sliceable.GetComponentsInChildren<Renderer>();
         if (rends.Length == 0) return false;
         var b = rends[0].bounds;
         foreach (var r in rends) b.Encapsulate(r.bounds);
@@ -95,7 +95,7 @@ public class PlayerToolUse : MonoBehaviour
         // the knife points FORWARD (away from you), blade vertical, so the cut
         // plane contains your view direction. Looking left/right slides the
         // slice along the item; the guide line runs front-to-back.
-        Vector3 axis = cameraTransform.right; axis.y = 0f; axis.Normalize();      // slide direction (aim left/right)
+        Vector3 axis = cameraTransform.right; axis.y = 0f; axis.Normalize();      // slide direction (aim left/right) = plane normal
         Vector3 lineDir = cameraTransform.forward; lineDir.y = 0f; lineDir.Normalize();  // knife + guide direction
         if (axis.sqrMagnitude < 0.001f || lineDir.sqrMagnitude < 0.001f) return false;
 
@@ -121,15 +121,14 @@ public class PlayerToolUse : MonoBehaviour
         }
         float along = Mathf.Clamp(Vector3.Dot(aimPoint - center, axis), -halfLen, halfLen);
 
-        targetCounter = counter;
-        cutT = halfLen > 0.0001f ? (along + halfLen) / (2f * halfLen) : 0.5f;
+        targetSliceable = sliceable;
+        cutNormal = axis;
         cutPointWorld = center + axis * along + Vector3.up * (b.extents.y + 0.01f);
 
         // Blade lies along the cut line, blade down. Hover rotation is applied
         // verbatim by the hold point (no compensation needed — the glue follows
         // the hold point directly).
-        var toolComp = held.GetComponent<Tool>();
-        hoverRot = Quaternion.LookRotation(lineDir, Vector3.up) * toolComp.HoverRotationOffset;
+        hoverRot = Quaternion.LookRotation(lineDir, Vector3.up) * tool.HoverRotationOffset;
 
         // Guide: single red line matching the KNIFE's footprint (its blade
         // track), so line and blade visually agree instead of the line only
@@ -145,20 +144,77 @@ public class PlayerToolUse : MonoBehaviour
         return true;
     }
 
+    /// The Sliceable the aim ray means: a board's slotted occupant, or a loose
+    /// piece that is physically resting on a cutting board with a recipe for it.
+    private Sliceable ResolveSliceable(Collider hitCollider, Vector3 hitPoint)
+    {
+        var direct = hitCollider.GetComponentInParent<Sliceable>();
+        if (direct != null)
+        {
+            var ko = direct.GetComponent<KitchenObject>();
+            if (ko.GetParent() is CuttingCounter slotted) return slotted.CanCut(ko) ? direct : null;
+            if (ko.GetParent() != null) return null;   // on a plate / other counter / in a hand
+            var board = FindBoardUnder(direct);
+            return board != null && board.CanCut(ko) ? direct : null;
+        }
+
+        var counter = hitCollider.GetComponentInParent<CuttingCounter>();
+        if (counter == null) return null;
+        if (counter.HasChoppableOccupant()) return counter.GetKitchenObject().GetComponent<Sliceable>();
+
+        // Aiming at the board right next to a loose piece (easy to do with round
+        // things like a tomato, whose top edge overhangs empty board): be
+        // forgiving and take the nearest cuttable piece within reach of the hit.
+        return FindLoosePieceNear(counter, hitPoint, nearPieceRadius);
+    }
+
+    [SerializeField] private float nearPieceRadius = 0.05f;   // board-hit tolerance around loose pieces
+    private static readonly Collider[] nearHits = new Collider[16];
+    private static Sliceable FindLoosePieceNear(CuttingCounter board, Vector3 point, float radius)
+    {
+        int n = Physics.OverlapSphereNonAlloc(point, radius, nearHits, ~0, QueryTriggerInteraction.Ignore);
+        Sliceable best = null; float bestD = float.MaxValue;
+        for (int i = 0; i < n; i++)
+        {
+            var s = nearHits[i].GetComponentInParent<Sliceable>();
+            if (s == null) continue;
+            var ko = s.GetComponent<KitchenObject>();
+            if (ko.GetParent() != null || !board.CanCut(ko)) continue;
+            float d = (nearHits[i].ClosestPoint(point) - point).sqrMagnitude;
+            if (d < bestD) { bestD = d; best = s; }
+        }
+        return best;
+    }
+
+    private static readonly RaycastHit[] downHits = new RaycastHit[8];
+    private static CuttingCounter FindBoardUnder(Sliceable piece)
+    {
+        var rend = piece.GetComponentInChildren<Renderer>();
+        Vector3 from = rend != null ? rend.bounds.center : piece.transform.position;
+        int n = Physics.RaycastNonAlloc(from, Vector3.down, downHits, 0.6f, ~0, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < n; i++)
+        {
+            if (downHits[i].collider.transform.IsChildOf(piece.transform)) continue;
+            var c = downHits[i].collider.GetComponentInParent<CuttingCounter>();
+            if (c != null) return c;
+        }
+        return null;
+    }
+
     private void EndHover()
     {
         if (!hovering) return;
         hovering = false;
         guide.enabled = false;
         carry.ClearHoldOverride();
-        targetCounter = null;
+        targetSliceable = null;
     }
 
     private IEnumerator ChopRoutine()
     {
         chopping = true;
-        var counter = targetCounter;
-        float t = cutT;
+        var target = targetSliceable;
+        Vector3 point = cutPointWorld, normal = cutNormal;
         Vector3 up = cutPointWorld + Vector3.up * hoverHeight;
         Vector3 down = cutPointWorld + Vector3.up * 0.015f;
 
@@ -167,7 +223,9 @@ public class PlayerToolUse : MonoBehaviour
             carry.SetHoldOverride(Vector3.Lerp(up, down, e / chopDipTime), hoverRot);
             yield return null;
         }
-        counter.ChopAt(t);
+        // The cut fires at the bottom of the dip, on the plane the guide showed
+        // (the promise to the player), not on the lagging knife transform.
+        if (target != null) target.TrySlice(point, normal, out _, out _);
         for (float e = 0f; e < chopRaiseTime; e += Time.deltaTime)
         {
             carry.SetHoldOverride(Vector3.Lerp(down, up, e / chopRaiseTime), hoverRot);

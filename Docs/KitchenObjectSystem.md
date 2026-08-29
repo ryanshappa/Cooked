@@ -39,3 +39,6 @@ Kitchen objects (ingredients, later plates/tools) are physical items that can ex
 - Counter-placed objects are dynamic-no-gravity; a shove could theoretically move them — revisit if it shows up in play.
 - `KitchenObjectSO.prefab` is typed `Transform` (Code Monkey style); fine, but Spawn helpers should hide that quirk.
 - ClearCounter will become a `BaseCounter` subclass in Phase 1.
+
+## Knife slicing flag
+`KitchenObjectSO.sliceProfile` (a `SliceProfileSO`) is the data-side switch that makes a food cuttable: `KitchenObject.Awake` auto-adds the runtime `Sliceable` when it is set, and cut pieces are spawned through `KitchenObject.SpawnSlice` (the sanctioned piece-creation path) inheriting the same SO. Prefabs carry no slicing components. Details: [MeshSlicing.md](MeshSlicing.md).
